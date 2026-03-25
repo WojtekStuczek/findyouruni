@@ -279,16 +279,15 @@ export default function App() {
       const icon = L.divIcon({
         className: 'custom-div-icon',
         html: `
-          <div class="university-marker flex items-center justify-center w-8 h-8 rounded-full border-2 shadow-lg transition-all duration-300 ${
+          <div class="university-marker flex items-center justify-center w-8 h-8 rounded-full shadow-lg transition-all duration-300 ${
             isTop10
-              ? 'bg-amber-500 border-amber-200 scale-110 z-50'
-              : 'bg-white border-blue-600'
+              ? 'bg-amber-500 scale-110 z-50'
+              : 'bg-blue-600'
           }">
-            <svg class="w-5 h-5 ${isTop10 ? 'text-white' : 'text-blue-600'}" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2L4 6v4c0 4.418 3.582 8 8 8s8-3.582 8-8V6l-8-4zm0 3l6 3v1c0 3.314-2.686 6-6 6s-6-2.686-6-6V8l6-3z"/>
-              <path d="M7 10h10v1H7z"/>
-              <path d="M8 12h8v1H8z"/>
-              <path d="M9 14h6v1H9z"/>
+            <svg class="w-[18px] h-[18px] text-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21.42 10.922a2 2 0 0 0-.019-3.838L12.83 4.33a2 2 0 0 0-1.66 0L2.6 7.08a2 2 0 0 0 0 3.832l8.57 2.751a2 2 0 0 0 1.66 0z"/>
+              <path d="M22 10v6"/>
+              <path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/>
             </svg>
           </div>
         `,
@@ -333,6 +332,7 @@ export default function App() {
         </div>
 
         <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end flex-wrap">
+          {/* Ranking Mode Toggle - temporarily disabled
           <div className={`items-center gap-2 ${isMobileSearchOpen ? 'hidden md:flex' : 'flex'}`}>
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider hidden md:block">Ranking type:</span>
             <div className="flex p-1 rounded-xl border transition-all bg-slate-100 border-slate-200">
@@ -360,6 +360,7 @@ export default function App() {
             </button>
           </div>
           </div>
+          */}
 
           <div className={`flex items-center gap-2 ${isMobileSearchOpen ? 'w-full' : ''}`}>
             <div className={`relative ${isMobileSearchOpen ? 'flex-1' : 'md:flex-1 md:w-64'}`}>
@@ -498,14 +499,6 @@ export default function App() {
         <aside className={`z-[1000] absolute inset-y-0 left-0 w-full md:w-80 lg:w-96 transition-transform duration-300 transform bg-white border-r border-slate-200 flex flex-col shadow-2xl ${
           showSidebar ? 'translate-x-0' : '-translate-x-full'
         }`}>
-          <div className="p-4 border-b border-slate-100 flex items-center justify-between">
-            <h2 className="font-bold text-sm uppercase tracking-wider text-slate-500">
-              {rankingMode === 'europe' ? 'Europe' : 'World'} Ranking ({filteredUniversities.length})
-            </h2>
-            <button onClick={() => setShowSidebar(false)} className="p-1 text-slate-400 hover:text-slate-600 transition-colors">
-              <X className="w-5 h-5" />
-            </button>
-          </div>
           <div className="flex-1 overflow-y-auto custom-scrollbar">
             {filteredUniversities.map((uni) => {
               const getNumericRank = (rank: number | string) => {
