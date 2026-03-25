@@ -1,0 +1,7 @@
+{
+  "name": "FindYourUni.eu",
+  "description": "Explore the best universities across Europe and the world with FindYourUni.eu. Compare rankings, discover top programs, and find your perfect study destination today!",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
