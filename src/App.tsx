@@ -319,19 +319,19 @@ export default function App() {
   return (
     <div className="relative h-screen w-screen flex flex-col bg-slate-50">
       {/* Header */}
-      <header className="z-[1001] border-b px-6 py-4 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4 bg-white/90 border-slate-200 text-slate-900 backdrop-blur-md">
-        <div className="flex items-center gap-3 w-full md:w-auto">
-          <div className="bg-blue-600 p-2 rounded-lg shadow-blue-200 shadow-lg shrink-0">
-            <Trophy className="w-5 h-5 text-white" />
+      <header className="z-[1001] border-b px-4 md:px-6 py-3 md:py-4 shadow-sm flex flex-row items-center justify-between gap-2 md:gap-4 bg-white/90 border-slate-200 text-slate-900 backdrop-blur-md">
+        <div className={`flex items-center gap-2 md:gap-3 ${isMobileSearchOpen ? 'hidden md:flex' : 'flex'}`}>
+          <div className="bg-blue-600 p-1.5 md:p-2 rounded-lg shadow-blue-200 shadow-lg shrink-0">
+            <Trophy className="w-4 h-4 md:w-5 md:h-5 text-white" />
           </div>
           <div>
-            <h1 className="text-lg md:text-xl font-bold tracking-tight leading-none">
+            <h1 className="text-base md:text-xl font-bold tracking-tight leading-none">
               University Finder
             </h1>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end flex-wrap">
+        <div className={`flex items-center gap-2 ${isMobileSearchOpen ? 'w-full md:w-auto' : 'w-auto'} justify-end`}>
           {/* Ranking Mode Toggle - temporarily disabled
           <div className={`items-center gap-2 ${isMobileSearchOpen ? 'hidden md:flex' : 'flex'}`}>
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider hidden md:block">Ranking type:</span>
@@ -367,9 +367,9 @@ export default function App() {
               {!isMobileSearchOpen && (
                 <button 
                   onClick={() => setIsMobileSearchOpen(true)}
-                  className="md:hidden p-2 rounded-xl border transition-all bg-slate-100 border-slate-200 text-slate-600 flex items-center justify-center w-[38px] h-[38px]"
+                  className="md:hidden p-2 rounded-xl border transition-all bg-slate-100 border-slate-200 text-slate-600 flex items-center justify-center w-[36px] h-[36px]"
                 >
-                  <Search className="w-5 h-5" />
+                  <Search className="w-4 h-4" />
                 </button>
               )}
               <div className={`${isMobileSearchOpen ? 'block' : 'hidden md:block'} relative w-full`}>
@@ -380,7 +380,7 @@ export default function App() {
                   placeholder="Search university or country..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-10 py-2 rounded-xl text-sm border transition-all outline-none focus:ring-2 focus:ring-blue-500 bg-slate-100 border-slate-200 text-slate-900 placeholder:text-slate-400"
+                  className="w-full pl-9 pr-9 py-2 rounded-xl text-sm border transition-all outline-none focus:ring-2 focus:ring-blue-500 bg-slate-100 border-slate-200 text-slate-900 placeholder:text-slate-400"
                 />
                 {searchQuery ? (
                   <button 
@@ -407,15 +407,15 @@ export default function App() {
                   setTempSpecialization(selectedSpecialization);
                   setIsFilterOpen(!isFilterOpen);
                 }}
-                className={`p-2 rounded-xl border transition-all flex items-center justify-center w-[38px] h-[38px] ${
+                className={`p-2 rounded-xl border transition-all flex items-center justify-center w-[36px] h-[36px] ${
                   selectedCountry || selectedSpecialization 
                     ? 'bg-blue-50 border-blue-200 text-blue-600' 
                     : 'bg-slate-100 border-slate-200 text-slate-600'
                 }`}
               >
-                <Filter className="w-5 h-5" />
+                <Filter className="w-4 h-4" />
                 {(selectedCountry || selectedSpecialization) && (
-                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full border-2 border-white"></span>
+                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-blue-500 rounded-full border-2 border-white"></span>
                 )}
               </button>
               
@@ -486,9 +486,9 @@ export default function App() {
 
             <button
               onClick={() => setShowSidebar(!showSidebar)}
-              className={`p-2 rounded-xl border transition-all md:hidden bg-slate-100 border-slate-200 text-slate-600 items-center justify-center w-[38px] h-[38px] ${isMobileSearchOpen ? 'hidden' : 'flex'}`}
+              className={`p-2 rounded-xl border transition-all md:hidden bg-slate-100 border-slate-200 text-slate-600 items-center justify-center w-[36px] h-[36px] ${isMobileSearchOpen ? 'hidden' : 'flex'}`}
             >
-              {showSidebar ? <MapIcon className="w-5 h-5" /> : <List className="w-5 h-5" />}
+              {showSidebar ? <MapIcon className="w-4 h-4" /> : <List className="w-4 h-4" />}
             </button>
           </div>
         </div>
@@ -588,16 +588,15 @@ export default function App() {
             </div>
           </div>
 
-          {/* Toggle Sidebar Button (Desktop) */}
-          {!showSidebar && (
-            <button
-              onClick={() => setShowSidebar(true)}
-              className="hidden md:flex absolute top-4 left-4 z-[1000] p-2 rounded-xl shadow-lg border transition-all items-center gap-2 font-bold text-xs uppercase tracking-wider bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
-            >
-              <List className="w-4 h-4" />
-              Show List
-            </button>
-          )}
+          {/* Floating Toggle Button (Desktop) */}
+          <button
+            onClick={() => setShowSidebar(!showSidebar)}
+            className={`hidden md:flex absolute top-1/2 -translate-y-1/2 z-[1000] w-12 h-12 bg-white border border-slate-200 rounded-full shadow-[0_0_15px_rgba(0,0,0,0.1)] items-center justify-center hover:bg-slate-50 hover:scale-110 transition-all duration-300 group ${
+              showSidebar ? 'left-80 lg:left-96 -translate-x-1/2' : 'left-4 translate-x-0'
+            }`}
+          >
+            <ChevronRight className={`w-6 h-6 text-slate-500 group-hover:text-blue-600 transition-transform duration-300 ${showSidebar ? 'rotate-180' : ''}`} />
+          </button>
         </main>
 
         {/* Right Sidebar - Details */}
