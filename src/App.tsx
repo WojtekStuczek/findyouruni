@@ -322,7 +322,7 @@ export default function App() {
       <header className="z-[1001] border-b px-4 md:px-6 py-3 md:py-4 shadow-sm flex flex-row items-center justify-between gap-2 md:gap-4 bg-white/90 border-slate-200 text-slate-900 backdrop-blur-md">
         <div className={`flex items-center gap-2 md:gap-3 ${isMobileSearchOpen ? 'hidden md:flex' : 'flex'}`}>
           <div className="bg-blue-600 p-1.5 md:p-2 rounded-lg shadow-blue-200 shadow-lg shrink-0">
-            <Trophy className="w-4 h-4 md:w-5 md:h-5 text-white" />
+            <GraduationCap className="w-4 h-4 md:w-5 md:h-5 text-white" />
           </div>
           <div>
             <h1 className="text-base md:text-xl font-bold tracking-tight leading-none">
