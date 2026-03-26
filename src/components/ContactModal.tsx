@@ -154,15 +154,15 @@ export function ContactModal({ isOpen, onClose, initialUniversities = '' }: Cont
             <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-2">
               <CheckCircle2 className="w-8 h-8" />
             </div>
-            <h3 className="text-xl font-bold text-slate-800">Message Sent!</h3>
+            <h3 className="text-xl font-bold text-slate-800"><span>Message Sent!</span></h3>
             <p className="text-sm text-slate-500">
-              Thank you for reaching out. We have received your request and will contact you at <span className="font-medium text-slate-700">{formData.email}</span> shortly.
+              <span>Thank you for reaching out. We have received your request and will contact you at </span><span className="font-medium text-slate-700">{formData.email}</span><span> shortly.</span>
             </p>
             <button
               onClick={onClose}
               className="mt-4 w-full bg-slate-100 hover:bg-slate-200 text-slate-700 px-5 py-2.5 rounded-xl font-bold text-sm transition-colors"
             >
-              Close
+              <span>Close</span>
             </button>
           </div>
         ) : (
@@ -348,12 +348,12 @@ export function ContactModal({ isOpen, onClose, initialUniversities = '' }: Cont
                 {isSubmitting ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    Sending...
+                    <span>Sending...</span>
                   </>
                 ) : (
                   <>
                     <Send className="w-4 h-4" />
-                    Send Message
+                    <span>Send Message</span>
                   </>
                 )}
               </button>

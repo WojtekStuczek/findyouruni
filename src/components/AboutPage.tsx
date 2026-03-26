@@ -177,15 +177,15 @@ export function AboutPage({ onBack }: AboutPageProps) {
                   className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg font-medium text-sm transition-colors"
                 >
                   <AlertCircle className="w-4 h-4" />
-                  Report an error
+                  <span>Report an error</span>
                 </button>
               ) : (
                 <div className="mt-4 bg-slate-50 p-4 rounded-lg border border-slate-200 animate-in fade-in slide-in-from-top-2">
                   {reportStatus === 'success' ? (
                     <div className="flex flex-col items-center justify-center py-4 text-green-600 gap-2">
                       <CheckCircle className="w-8 h-8" />
-                      <p className="font-medium">Thank you for your report!</p>
-                      <p className="text-sm text-green-700/80">We will review it shortly.</p>
+                      <p className="font-medium"><span>Thank you for your report!</span></p>
+                      <p className="text-sm text-green-700/80"><span>We will review it shortly.</span></p>
                     </div>
                   ) : (
                     <form onSubmit={handleReportSubmit} className="space-y-3">
@@ -227,17 +227,17 @@ export function AboutPage({ onBack }: AboutPageProps) {
                           onClick={() => setIsReportFormOpen(false)}
                           className="px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-200 rounded-lg transition-colors"
                         >
-                          Cancel
+                          <span>Cancel</span>
                         </button>
                         <button 
                           type="submit"
                           disabled={reportStatus === 'submitting'}
                           className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors"
                         >
-                          {reportStatus === 'submitting' ? 'Sending...' : (
+                          {reportStatus === 'submitting' ? <span>Sending...</span> : (
                             <>
                               <Send className="w-4 h-4" />
-                              Submit Report
+                              <span>Submit Report</span>
                             </>
                           )}
                         </button>

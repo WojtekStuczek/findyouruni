@@ -270,7 +270,7 @@ export default function App() {
         return L.divIcon({
           html: `<div><span>${childCount}</span></div>`,
           className: 'marker-cluster' + c,
-          iconSize: L.point(48, 48)
+          iconSize: L.point(40, 40)
         });
       }
     }).addTo(leafletMap.current);
