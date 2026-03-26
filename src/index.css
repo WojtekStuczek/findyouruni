@@ -111,37 +111,34 @@ body {
   line-height: 1;
 }
 
-.falling-leaf {
-  position: fixed;
-  top: -50px;
-  right: 10%;
-  z-index: 2001;
-  pointer-events: none;
-  animation: fall-and-sway 10s ease-in-out forwards;
+.leaf-prompt-wrapper {
+  perspective: 1000px;
 }
 
-@keyframes fall-and-sway {
+.leaf-prompt-animation {
+  transform-style: preserve-3d;
+  animation: leaf-fall-3d 3s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+@keyframes leaf-fall-3d {
   0% {
-    transform: translate(0, 0) rotate(0deg);
     opacity: 0;
+    transform: translate3d(30vw, -80vh, -200px) rotateX(60deg) rotateY(45deg) rotateZ(-45deg);
   }
-  5% {
+  20% {
     opacity: 1;
+    transform: translate3d(15vw, -50vh, 100px) rotateX(-40deg) rotateY(-30deg) rotateZ(20deg);
   }
-  25% {
-    transform: translate(-50px, 25vh) rotate(45deg);
+  40% {
+    transform: translate3d(-5vw, -25vh, -50px) rotateX(30deg) rotateY(20deg) rotateZ(-15deg);
   }
-  50% {
-    transform: translate(20px, 50vh) rotate(-30deg);
+  60% {
+    transform: translate3d(2vw, -10vh, 20px) rotateX(-15deg) rotateY(-10deg) rotateZ(10deg);
   }
-  75% {
-    transform: translate(-40px, 75vh) rotate(60deg);
-  }
-  95% {
-    opacity: 1;
+  80% {
+    transform: translate3d(-1vw, -2vh, -10px) rotateX(5deg) rotateY(5deg) rotateZ(-5deg);
   }
   100% {
-    transform: translate(10px, 105vh) rotate(-15deg);
-    opacity: 0;
+    transform: translate3d(0, 0, 0) rotateX(0deg) rotateY(0deg) rotateZ(0deg);
   }
 }

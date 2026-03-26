@@ -744,44 +744,40 @@ export default function App() {
       
       {/* Help Prompt */}
       {showHelpPrompt && currentPage === 'home' && (
-        <>
-          {/* Falling Leaf Animation */}
-          <div className="falling-leaf">
-            <Leaf className="w-10 h-10 text-amber-500 fill-amber-500/20" />
-          </div>
-          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 md:left-auto md:right-6 md:translate-x-0 z-[2000] w-[90vw] max-w-sm bg-white rounded-2xl shadow-2xl border border-blue-100 p-5 animate-in slide-in-from-bottom-8 fade-in duration-500">
-          <div className="flex items-start gap-4">
-            <div className="bg-blue-100 p-2.5 rounded-xl text-blue-600 shrink-0">
-              <HelpCircle className="w-6 h-6" />
-            </div>
-            <div className="flex-1">
-              <div className="flex justify-between items-start">
-                <h3 className="font-bold text-slate-900 mb-1">Need some help?</h3>
-                <button onClick={handleDismissHelp} className="text-slate-400 hover:text-slate-600 -mt-1 -mr-1 p-1">
-                  <X className="w-4 h-4" />
-                </button>
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 md:left-auto md:right-6 md:translate-x-0 z-[2000] w-[90vw] max-w-sm leaf-prompt-wrapper">
+          <div className="bg-white rounded-2xl shadow-2xl border border-blue-100 p-5 leaf-prompt-animation">
+            <div className="flex items-start gap-4">
+              <div className="bg-blue-100 p-2.5 rounded-xl text-blue-600 shrink-0">
+                <HelpCircle className="w-6 h-6" />
               </div>
-              <p className="text-sm text-slate-600 mb-4 leading-relaxed">
-                Not sure where to start? Check out our guide on how to use the platform!
-              </p>
-              <div className="flex gap-2">
-                <button 
-                  onClick={handleGoToAbout}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2 px-3 rounded-lg transition-colors text-center shadow-sm shadow-blue-200"
-                >
-                  Show me how
-                </button>
-                <button 
-                  onClick={handleDismissHelp}
-                  className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold py-2 px-3 rounded-lg transition-colors text-center"
-                >
-                  No, thanks
-                </button>
+              <div className="flex-1">
+                <div className="flex justify-between items-start">
+                  <h3 className="font-bold text-slate-900 mb-1">Need some help?</h3>
+                  <button onClick={handleDismissHelp} className="text-slate-400 hover:text-slate-600 -mt-1 -mr-1 p-1">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+                <p className="text-sm text-slate-600 mb-4 leading-relaxed">
+                  Not sure where to start? Check out our guide on how to use the platform!
+                </p>
+                <div className="flex gap-2">
+                  <button 
+                    onClick={handleGoToAbout}
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2 px-3 rounded-lg transition-colors text-center shadow-sm shadow-blue-200"
+                  >
+                    Show me how
+                  </button>
+                  <button 
+                    onClick={handleDismissHelp}
+                    className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold py-2 px-3 rounded-lg transition-colors text-center"
+                  >
+                    No, thanks
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         </div>
-        </>
       )}
 
       <ContactModal 
