@@ -257,6 +257,22 @@ export default function App() {
       spiderfyOnMaxZoom: true,
       chunkedLoading: true,
       maxClusterRadius: 40,
+      iconCreateFunction: function (cluster) {
+        const childCount = cluster.getChildCount();
+        let c = ' marker-cluster-';
+        if (childCount < 10) {
+          c += 'small';
+        } else if (childCount < 100) {
+          c += 'medium';
+        } else {
+          c += 'large';
+        }
+        return L.divIcon({
+          html: `<div><span>${childCount}</span></div>`,
+          className: 'marker-cluster' + c,
+          iconSize: L.point(48, 48)
+        });
+      }
     }).addTo(leafletMap.current);
 
     L.control.zoom({ position: 'bottomright' }).addTo(leafletMap.current);

@@ -1,5 +1,6 @@
 import { ArrowLeft, GraduationCap, Map as MapIcon, Search, Filter, Globe, AlertCircle, Send, CheckCircle } from 'lucide-react';
 import { useState } from 'react';
+import { universities } from '../data';
 
 interface AboutPageProps {
   onBack: () => void;
@@ -9,6 +10,9 @@ export function AboutPage({ onBack }: AboutPageProps) {
   const [isReportFormOpen, setIsReportFormOpen] = useState(false);
   const [reportStatus, setReportStatus] = useState<'idle' | 'submitting' | 'success'>('idle');
   const [reportMessage, setReportMessage] = useState('');
+  const [reportUniversity, setReportUniversity] = useState('');
+  const [showTerms, setShowTerms] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false);
 
   const handleReportSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,6 +37,7 @@ export function AboutPage({ onBack }: AboutPageProps) {
           access_key: accessKey,
           subject: "New Error Report from FindYourUni.eu",
           from_name: "Anonymous User",
+          university: reportUniversity || "Not specified",
           message: reportMessage,
         }),
       });
@@ -42,6 +47,7 @@ export function AboutPage({ onBack }: AboutPageProps) {
       if (result.success) {
         setReportStatus('success');
         setReportMessage('');
+        setReportUniversity('');
         setTimeout(() => {
           setIsReportFormOpen(false);
           setReportStatus('idle');
@@ -184,6 +190,24 @@ export function AboutPage({ onBack }: AboutPageProps) {
                   ) : (
                     <form onSubmit={handleReportSubmit} className="space-y-3">
                       <div>
+                        <label htmlFor="error-university" className="block text-sm font-medium text-slate-700 mb-1">
+                          Which university is this about? (Optional)
+                        </label>
+                        <select
+                          id="error-university"
+                          value={reportUniversity}
+                          onChange={(e) => setReportUniversity(e.target.value)}
+                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm bg-white"
+                        >
+                          <option value="">-- Select a university --</option>
+                          {universities.map((uni) => (
+                            <option key={uni.name} value={uni.name}>
+                              {uni.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
                         <label htmlFor="error-details" className="block text-sm font-medium text-slate-700 mb-1">
                           What needs to be fixed?
                         </label>
@@ -226,6 +250,46 @@ export function AboutPage({ onBack }: AboutPageProps) {
           </div>
         </section>
       </main>
+
+      {/* Footer */}
+      <footer className="text-center p-6 text-sm text-slate-500 bg-slate-50 border-t border-slate-200 mt-12">
+        <p className="mb-2">© 2026 FindYourUni. All rights reserved. Data source: QS World University Rankings 2026.</p>
+        <p>
+          <button onClick={() => setShowTerms(true)} className="text-blue-600 hover:underline">Terms of Service</button> | 
+          <button onClick={() => setShowPrivacy(true)} className="text-blue-600 hover:underline ml-1">Privacy Policy</button>
+        </p>
+      </footer>
+
+      {/* Modals */}
+      {showTerms && (
+        <div className="fixed inset-0 bg-slate-900/50 z-[9999] flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="bg-white p-8 rounded-xl max-w-2xl w-full shadow-2xl">
+            <h2 className="text-2xl font-bold text-slate-900 mb-4">Terms of Service</h2>
+            <div className="space-y-3 text-slate-600">
+              <p>FindYourUni is an independent educational resource.</p>
+              <p>Data is sourced from QS World University Rankings 2026.</p>
+              <p>All content on this website is protected by copyright © 2026 FindYourUni.</p>
+              <p>You may not copy, reproduce or distribute any data or design without permission.</p>
+              <p>FindYourUni is not affiliated with QS Rankings or any university listed.</p>
+              <p>Information is provided for educational purposes only.</p>
+            </div>
+            <button onClick={() => setShowTerms(false)} className="mt-6 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors">Close</button>
+          </div>
+        </div>
+      )}
+
+      {showPrivacy && (
+        <div className="fixed inset-0 bg-slate-900/50 z-[9999] flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="bg-white p-8 rounded-xl max-w-2xl w-full shadow-2xl">
+            <h2 className="text-2xl font-bold text-slate-900 mb-4">Privacy Policy</h2>
+            <div className="space-y-3 text-slate-600">
+              <p>We use Vercel Analytics to collect anonymous, cookieless usage statistics. No personal data is collected.</p>
+              <p>By using this website you agree to these terms.</p>
+            </div>
+            <button onClick={() => setShowPrivacy(false)} className="mt-6 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors">Close</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
