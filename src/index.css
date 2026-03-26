@@ -70,22 +70,22 @@ body {
 
 /* Marker Cluster Styling */
 .marker-cluster-small {
-  background-color: rgba(147, 197, 253, 0.6); /* blue-300 */
+  background-color: rgba(181, 226, 191, 0.6);
 }
 .marker-cluster-small div {
-  background-color: rgba(59, 130, 246, 0.9); /* blue-500 */
+  background-color: rgba(110, 204, 57, 0.6);
 }
 .marker-cluster-medium {
-  background-color: rgba(96, 165, 250, 0.6); /* blue-400 */
+  background-color: rgba(241, 211, 87, 0.6);
 }
 .marker-cluster-medium div {
-  background-color: rgba(37, 99, 235, 0.9); /* blue-600 */
+  background-color: rgba(240, 194, 12, 0.6);
 }
 .marker-cluster-large {
-  background-color: rgba(59, 130, 246, 0.6); /* blue-500 */
+  background-color: rgba(253, 156, 115, 0.6);
 }
 .marker-cluster-large div {
-  background-color: rgba(29, 78, 216, 0.9); /* blue-700 */
+  background-color: rgba(241, 128, 23, 0.6);
 }
 .marker-cluster {
   background-clip: padding-box;
