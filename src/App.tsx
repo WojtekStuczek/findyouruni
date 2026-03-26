@@ -2,8 +2,9 @@ import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import L from 'leaflet';
 import 'leaflet.markercluster';
 import { universities } from './data';
-import { Trophy, Info, Search, X, List, Map as MapIcon, ChevronRight, Globe, LayoutGrid, ListFilter as Filter, GraduationCap } from 'lucide-react';
+import { Trophy, Info, Search, X, List, Map as MapIcon, ChevronRight, Globe, LayoutGrid, ListFilter as Filter, GraduationCap, HelpCircle } from 'lucide-react';
 import { ContactModal } from './components/ContactModal';
+import { AboutPage } from './components/AboutPage';
 import { cloudinaryUrls } from './cloudinaryUrls';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
@@ -148,6 +149,7 @@ export default function App() {
   
   const [searchQuery, setSearchQuery] = useState('');
   const [showSidebar, setShowSidebar] = useState(false);
+  const [currentPage, setCurrentPage] = useState<'home' | 'about'>('home');
   const [rankingMode, setRankingMode] = useState<'europe' | 'world'>('europe');
   const [selectedUni, setSelectedUni] = useState<typeof universities[0] | null>(null);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
@@ -159,6 +161,30 @@ export default function App() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [preselectedUni, setPreselectedUni] = useState<string>('');
+  const [showHelpPrompt, setShowHelpPrompt] = useState(false);
+
+  useEffect(() => {
+    const hasSeenPrompt = localStorage.getItem('hasSeenHelpPrompt');
+    if (!hasSeenPrompt) {
+      const timer = setTimeout(() => {
+        if (currentPage === 'home') {
+          setShowHelpPrompt(true);
+        }
+      }, 60000); // 60 seconds
+      return () => clearTimeout(timer);
+    }
+  }, [currentPage]);
+
+  const handleDismissHelp = () => {
+    setShowHelpPrompt(false);
+    localStorage.setItem('hasSeenHelpPrompt', 'true');
+  };
+
+  const handleGoToAbout = () => {
+    setShowHelpPrompt(false);
+    localStorage.setItem('hasSeenHelpPrompt', 'true');
+    setCurrentPage('about');
+  };
 
   useEffect(() => {
     if (window.innerWidth >= 768) {
@@ -317,7 +343,9 @@ export default function App() {
   }, [filteredUniversities, rankingMode]);
 
   return (
-    <div className="relative h-screen w-screen flex flex-col bg-slate-50">
+    <>
+      {currentPage === 'about' && <AboutPage onBack={() => setCurrentPage('home')} />}
+      <div className={`relative h-screen w-screen flex flex-col bg-slate-50 ${currentPage === 'about' ? 'hidden' : ''}`}>
       {/* Header */}
       <header className="z-[1001] border-b px-4 md:px-6 py-3 md:py-4 shadow-sm flex flex-row items-center justify-between gap-2 md:gap-4 bg-white/90 border-slate-200 text-slate-900 backdrop-blur-md">
         <div className={`flex items-center gap-2 md:gap-3 ${isMobileSearchOpen ? 'hidden md:flex' : 'flex'}`}>
@@ -363,14 +391,32 @@ export default function App() {
           */}
 
           <div className={`flex items-center gap-2 ${isMobileSearchOpen ? 'w-full' : ''}`}>
+            {!isMobileSearchOpen && (
+              <button
+                onClick={() => setCurrentPage('about')}
+                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow-sm"
+                title="About"
+              >
+                <Info className="w-4 h-4" />
+                About
+              </button>
+            )}
             <div className={`relative ${isMobileSearchOpen ? 'flex-1' : 'md:flex-1 md:w-64'}`}>
               {!isMobileSearchOpen && (
-                <button 
-                  onClick={() => setIsMobileSearchOpen(true)}
-                  className="md:hidden p-2 rounded-xl border transition-all bg-slate-100 border-slate-200 text-slate-600 flex items-center justify-center w-[36px] h-[36px]"
-                >
-                  <Search className="w-4 h-4" />
-                </button>
+                <div className="md:hidden flex items-center gap-2">
+                  <button 
+                    onClick={() => setCurrentPage('about')}
+                    className="p-2 rounded-xl transition-all bg-blue-600 text-white hover:bg-blue-700 flex items-center justify-center w-[36px] h-[36px] shadow-sm"
+                  >
+                    <Info className="w-4 h-4" />
+                  </button>
+                  <button 
+                    onClick={() => setIsMobileSearchOpen(true)}
+                    className="p-2 rounded-xl border transition-all bg-slate-100 border-slate-200 text-slate-600 flex items-center justify-center w-[36px] h-[36px]"
+                  >
+                    <Search className="w-4 h-4" />
+                  </button>
+                </div>
               )}
               <div className={`${isMobileSearchOpen ? 'block' : 'hidden md:block'} relative w-full`}>
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -680,6 +726,42 @@ export default function App() {
         </aside>
       </div>
       
+      {/* Help Prompt */}
+      {showHelpPrompt && currentPage === 'home' && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 md:left-auto md:right-6 md:translate-x-0 z-[2000] w-[90vw] max-w-sm bg-white rounded-2xl shadow-2xl border border-blue-100 p-5 animate-in slide-in-from-bottom-8 fade-in duration-500">
+          <div className="flex items-start gap-4">
+            <div className="bg-blue-100 p-2.5 rounded-xl text-blue-600 shrink-0">
+              <HelpCircle className="w-6 h-6" />
+            </div>
+            <div className="flex-1">
+              <div className="flex justify-between items-start">
+                <h3 className="font-bold text-slate-900 mb-1">Need some help?</h3>
+                <button onClick={handleDismissHelp} className="text-slate-400 hover:text-slate-600 -mt-1 -mr-1 p-1">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <p className="text-sm text-slate-600 mb-4 leading-relaxed">
+                Not sure where to start? Check out our guide on how to use the platform!
+              </p>
+              <div className="flex gap-2">
+                <button 
+                  onClick={handleGoToAbout}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2 px-3 rounded-lg transition-colors text-center shadow-sm shadow-blue-200"
+                >
+                  Show me how
+                </button>
+                <button 
+                  onClick={handleDismissHelp}
+                  className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold py-2 px-3 rounded-lg transition-colors text-center"
+                >
+                  No, thanks
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <ContactModal 
         isOpen={isContactModalOpen} 
         onClose={() => setIsContactModalOpen(false)}
@@ -688,5 +770,6 @@ export default function App() {
       <Analytics />
       <SpeedInsights />
     </div>
+    </>
   );
 }
