@@ -110,29 +110,3 @@ body {
 .marker-cluster span {
   line-height: 1;
 }
-
-/* Paper Airplane Animation */
-@keyframes paperAirplane {
-  0% {
-    opacity: 0;
-    transform: translate(50vw, -100vh) rotate(-45deg) scale(0.3);
-  }
-  30% {
-    opacity: 1;
-    transform: translate(20vw, -50vh) rotate(-20deg) scale(0.8);
-  }
-  60% {
-    transform: translate(-5vw, 10vh) rotate(10deg) scale(1.05);
-  }
-  80% {
-    transform: translate(2vw, -2vh) rotate(-5deg) scale(0.98);
-  }
-  100% {
-    opacity: 1;
-    transform: translate(0, 0) rotate(0deg) scale(1);
-  }
-}
-
-.animate-paper-airplane {
-  animation: paperAirplane 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-}
