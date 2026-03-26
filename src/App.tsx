@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import L from 'leaflet';
 import 'leaflet.markercluster';
 import { universities } from './data';
-import { Trophy, Info, Search, X, List, Map as MapIcon, ChevronRight, Globe, LayoutGrid, ListFilter as Filter, GraduationCap, HelpCircle } from 'lucide-react';
+import { Trophy, Info, Search, X, List, Map as MapIcon, ChevronRight, Globe, LayoutGrid, ListFilter as Filter, GraduationCap, HelpCircle, Leaf } from 'lucide-react';
 import { ContactModal } from './components/ContactModal';
 import { AboutPage } from './components/AboutPage';
 import { cloudinaryUrls } from './cloudinaryUrls';
@@ -170,7 +170,7 @@ export default function App() {
         if (currentPage === 'home') {
           setShowHelpPrompt(true);
         }
-      }, 60000); // 60 seconds
+      }, 10000); // Changed to 10 seconds for testing
       return () => clearTimeout(timer);
     }
   }, [currentPage]);
@@ -744,7 +744,12 @@ export default function App() {
       
       {/* Help Prompt */}
       {showHelpPrompt && currentPage === 'home' && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 md:left-auto md:right-6 md:translate-x-0 z-[2000] w-[90vw] max-w-sm bg-white rounded-2xl shadow-2xl border border-blue-100 p-5 animate-in slide-in-from-bottom-8 fade-in duration-500">
+        <>
+          {/* Falling Leaf Animation */}
+          <div className="falling-leaf">
+            <Leaf className="w-10 h-10 text-amber-500 fill-amber-500/20" />
+          </div>
+          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 md:left-auto md:right-6 md:translate-x-0 z-[2000] w-[90vw] max-w-sm bg-white rounded-2xl shadow-2xl border border-blue-100 p-5 animate-in slide-in-from-bottom-8 fade-in duration-500">
           <div className="flex items-start gap-4">
             <div className="bg-blue-100 p-2.5 rounded-xl text-blue-600 shrink-0">
               <HelpCircle className="w-6 h-6" />
@@ -776,6 +781,7 @@ export default function App() {
             </div>
           </div>
         </div>
+        </>
       )}
 
       <ContactModal 

@@ -110,3 +110,38 @@ body {
 .marker-cluster span {
   line-height: 1;
 }
+
+.falling-leaf {
+  position: fixed;
+  top: -50px;
+  right: 10%;
+  z-index: 2001;
+  pointer-events: none;
+  animation: fall-and-sway 10s ease-in-out forwards;
+}
+
+@keyframes fall-and-sway {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 0;
+  }
+  5% {
+    opacity: 1;
+  }
+  25% {
+    transform: translate(-50px, 25vh) rotate(45deg);
+  }
+  50% {
+    transform: translate(20px, 50vh) rotate(-30deg);
+  }
+  75% {
+    transform: translate(-40px, 75vh) rotate(60deg);
+  }
+  95% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(10px, 105vh) rotate(-15deg);
+    opacity: 0;
+  }
+}

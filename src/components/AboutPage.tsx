@@ -265,13 +265,11 @@ export function AboutPage({ onBack }: AboutPageProps) {
         <div className="fixed inset-0 bg-slate-900/50 z-[9999] flex items-center justify-center p-4 backdrop-blur-sm">
           <div className="bg-white p-8 rounded-xl max-w-2xl w-full shadow-2xl">
             <h2 className="text-2xl font-bold text-slate-900 mb-4">Terms of Service</h2>
-            <div className="space-y-3 text-slate-600">
-              <p>FindYourUni is an independent educational resource.</p>
-              <p>Data is sourced from QS World University Rankings 2026.</p>
-              <p>All content on this website is protected by copyright © 2026 FindYourUni.</p>
-              <p>You may not copy, reproduce or distribute any data or design without permission.</p>
-              <p>FindYourUni is not affiliated with QS Rankings or any university listed.</p>
-              <p>Information is provided for educational purposes only.</p>
+            <div className="space-y-4 text-slate-600 text-sm">
+              <p><strong>1. Intellectual Property</strong><br/>All code, design, architecture, and original content on this website are the exclusive property of FindYourUni and are protected by copyright © 2026. You may not copy, reproduce, or distribute any part of this application without explicit permission.</p>
+              <p><strong>2. Data Scraping & Mining</strong><br/>Automated scraping, mining, extraction, or harvesting of data from this website is strictly prohibited. The data is provided for personal, non-commercial educational use only.</p>
+              <p><strong>3. Reverse Engineering</strong><br/>You may not reverse engineer, decompile, or disassemble any part of this application's frontend or backend code.</p>
+              <p><strong>4. Disclaimer</strong><br/>FindYourUni is an independent educational resource. Data is sourced from QS World University Rankings 2026. FindYourUni is not affiliated with QS Rankings or any university listed. Information is provided "as is" for educational purposes only.</p>
             </div>
             <button onClick={() => setShowTerms(false)} className="mt-6 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors">Close</button>
           </div>
