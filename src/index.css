@@ -111,34 +111,40 @@ body {
   line-height: 1;
 }
 
-.leaf-prompt-wrapper {
-  perspective: 1000px;
+.paper-plane-wrapper {
+  perspective: 1200px;
 }
 
-.leaf-prompt-animation {
+.paper-plane-animation {
   transform-style: preserve-3d;
-  animation: leaf-fall-3d 3s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  transform-origin: center center;
+  animation: paper-plane-glide 4.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
-@keyframes leaf-fall-3d {
+@keyframes paper-plane-glide {
   0% {
     opacity: 0;
-    transform: translate3d(30vw, -80vh, -200px) rotateX(60deg) rotateY(45deg) rotateZ(-45deg);
+    /* Start: Prawy górny róg, daleko i wysoko */
+    transform: translate3d(60vw, -100vh, 500px) rotateX(60deg) rotateY(-30deg) rotateZ(-60deg) scale(0.2);
   }
-  20% {
+  15% {
     opacity: 1;
-    transform: translate3d(15vw, -50vh, 100px) rotateX(-40deg) rotateY(-30deg) rotateZ(20deg);
   }
-  40% {
-    transform: translate3d(-5vw, -25vh, -50px) rotateX(30deg) rotateY(20deg) rotateZ(-15deg);
+  35% {
+    /* Wlot na środek ekranu, powiększenie i początek piruetu */
+    transform: translate3d(10vw, -60vh, 300px) rotateX(30deg) rotateY(0deg) rotateZ(120deg) scale(1.2);
   }
   60% {
-    transform: translate3d(2vw, -10vh, 20px) rotateX(-15deg) rotateY(-10deg) rotateZ(10deg);
+    /* Kontynuacja piruetu (obrót o 360 stopni), zniżanie lotu */
+    transform: translate3d(-15vw, -30vh, 150px) rotateX(0deg) rotateY(30deg) rotateZ(300deg) scale(0.9);
   }
-  80% {
-    transform: translate3d(-1vw, -2vh, -10px) rotateX(5deg) rotateY(5deg) rotateZ(-5deg);
+  85% {
+    /* Koniec piruetu, wyrównywanie lotu przed lądowaniem */
+    transform: translate3d(0vw, -5vh, 50px) rotateX(-10deg) rotateY(-10deg) rotateZ(370deg) scale(1.05);
   }
   100% {
-    transform: translate3d(0, 0, 0) rotateX(0deg) rotateY(0deg) rotateZ(0deg);
+    opacity: 1;
+    /* Lądowanie na środku na dole (z zachowaniem 360 stopni obrotu, żeby nie przeskoczyło) */
+    transform: translate3d(0, 0, 0) rotateX(0deg) rotateY(0deg) rotateZ(360deg) scale(1);
   }
 }

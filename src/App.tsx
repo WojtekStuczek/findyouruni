@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import L from 'leaflet';
 import 'leaflet.markercluster';
 import { universities } from './data';
-import { Trophy, Info, Search, X, List, Map as MapIcon, ChevronRight, Globe, LayoutGrid, ListFilter as Filter, GraduationCap, HelpCircle, Leaf } from 'lucide-react';
+import { Trophy, Info, Search, X, List, Map as MapIcon, ChevronRight, Globe, LayoutGrid, ListFilter as Filter, GraduationCap, HelpCircle } from 'lucide-react';
 import { ContactModal } from './components/ContactModal';
 import { AboutPage } from './components/AboutPage';
 import { cloudinaryUrls } from './cloudinaryUrls';
@@ -170,7 +170,7 @@ export default function App() {
         if (currentPage === 'home') {
           setShowHelpPrompt(true);
         }
-      }, 10000); // Changed to 10 seconds for testing
+      }, 30000); // 30 seconds
       return () => clearTimeout(timer);
     }
   }, [currentPage]);
@@ -410,11 +410,14 @@ export default function App() {
             {!isMobileSearchOpen && (
               <button
                 onClick={() => setCurrentPage('about')}
-                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow-sm"
+                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow-sm relative"
                 title="About"
               >
                 <Info className="w-4 h-4" />
                 About
+                {showHelpPrompt && (
+                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-[#ff0000] border-2 border-white rounded-full animate-pulse shadow-[0_0_8px_rgba(255,0,0,0.8)]"></span>
+                )}
               </button>
             )}
             <div className={`relative ${isMobileSearchOpen ? 'flex-1' : 'md:flex-1 md:w-64'}`}>
@@ -422,9 +425,12 @@ export default function App() {
                 <div className="md:hidden flex items-center gap-2">
                   <button 
                     onClick={() => setCurrentPage('about')}
-                    className="p-2 rounded-xl transition-all bg-blue-600 text-white hover:bg-blue-700 flex items-center justify-center w-[36px] h-[36px] shadow-sm"
+                    className="p-2 rounded-xl transition-all bg-blue-600 text-white hover:bg-blue-700 flex items-center justify-center w-[36px] h-[36px] shadow-sm relative"
                   >
                     <Info className="w-4 h-4" />
+                    {showHelpPrompt && (
+                      <span className="absolute -top-1 -right-1 w-3 h-3 bg-[#ff0000] border-2 border-white rounded-full animate-pulse shadow-[0_0_8px_rgba(255,0,0,0.8)]"></span>
+                    )}
                   </button>
                   <button 
                     onClick={() => setIsMobileSearchOpen(true)}
@@ -744,37 +750,27 @@ export default function App() {
       
       {/* Help Prompt */}
       {showHelpPrompt && currentPage === 'home' && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 md:left-auto md:right-6 md:translate-x-0 z-[2000] w-[90vw] max-w-sm leaf-prompt-wrapper">
-          <div className="bg-white rounded-2xl shadow-2xl border border-blue-100 p-5 leaf-prompt-animation">
-            <div className="flex items-start gap-4">
-              <div className="bg-blue-100 p-2.5 rounded-xl text-blue-600 shrink-0">
-                <HelpCircle className="w-6 h-6" />
+        <div className="fixed top-20 right-4 md:right-6 z-[2000] w-[90vw] max-w-sm bg-blue-600 rounded-2xl shadow-[0_20px_50px_-12px_rgba(0,0,0,0.3)] border border-blue-500 p-5 animate-in fade-in slide-in-from-top-4 duration-500">
+          {/* Tooltip Arrow pointing up to the About button */}
+          <div className="absolute -top-2 right-[54px] md:right-[325px] w-4 h-4 bg-blue-600 rotate-45 border-t border-l border-blue-500"></div>
+          
+          <div className="flex items-start gap-4 relative z-10">
+            <div className="bg-white/20 p-2.5 rounded-xl text-white shrink-0">
+              <HelpCircle className="w-6 h-6" />
+            </div>
+            <div className="flex-1">
+              <div className="flex justify-between items-start">
+                <h3 className="font-bold text-white mb-1 text-lg">Need some help?</h3>
+                <button 
+                  onClick={handleDismissHelp} 
+                  className="text-blue-200 hover:text-white -mt-1 -mr-1 p-1 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
               </div>
-              <div className="flex-1">
-                <div className="flex justify-between items-start">
-                  <h3 className="font-bold text-slate-900 mb-1">Need some help?</h3>
-                  <button onClick={handleDismissHelp} className="text-slate-400 hover:text-slate-600 -mt-1 -mr-1 p-1">
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-                <p className="text-sm text-slate-600 mb-4 leading-relaxed">
-                  Not sure where to start? Check out our guide on how to use the platform!
-                </p>
-                <div className="flex gap-2">
-                  <button 
-                    onClick={handleGoToAbout}
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2 px-3 rounded-lg transition-colors text-center shadow-sm shadow-blue-200"
-                  >
-                    Show me how
-                  </button>
-                  <button 
-                    onClick={handleDismissHelp}
-                    className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold py-2 px-3 rounded-lg transition-colors text-center"
-                  >
-                    No, thanks
-                  </button>
-                </div>
-              </div>
+              <p className="text-sm text-blue-100 leading-relaxed">
+                Not sure where to start? Check out our guide on how to use the platform!
+              </p>
             </div>
           </div>
         </div>
