@@ -1,5 +1,5 @@
 import { ArrowLeft, GraduationCap, Map as MapIcon, Search, Filter, Globe, AlertCircle, Send, CheckCircle } from 'lucide-react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { universities } from '../data';
 
 interface AboutPageProps {
@@ -17,24 +17,15 @@ export function AboutPage({ onBack }: AboutPageProps) {
   const handleReportSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setReportStatus('submitting');
-    
-    const accessKey = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY;
-    
-    if (!accessKey) {
-      alert("Brak klucza API Web3Forms. Skonfiguruj zmienną środowiskową VITE_WEB3FORMS_ACCESS_KEY w ustawieniach aplikacji.");
-      setReportStatus('idle');
-      return;
-    }
 
     try {
-      const response = await fetch("https://api.web3forms.com/submit", {
+      const response = await fetch("/api/contact", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
         },
         body: JSON.stringify({
-          access_key: accessKey,
           subject: "New Error Report from FindYourUni.eu",
           from_name: "Anonymous User",
           university: reportUniversity || "Not specified",

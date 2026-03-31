@@ -79,24 +79,15 @@ export function ContactModal({ isOpen, onClose, initialUniversities = '' }: Cont
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    const accessKey = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY;
-    
-    if (!accessKey) {
-      alert("Brak klucza API Web3Forms. Skonfiguruj zmienną środowiskową VITE_WEB3FORMS_ACCESS_KEY w ustawieniach aplikacji.");
-      setIsSubmitting(false);
-      return;
-    }
 
     try {
-      const response = await fetch("https://api.web3forms.com/submit", {
+      const response = await fetch("/api/contact", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
         },
         body: JSON.stringify({
-          access_key: accessKey,
           subject: "New University Application Assistance Request",
           from_name: "University Finder App",
           name: `${formData.firstName} ${formData.lastName}`,

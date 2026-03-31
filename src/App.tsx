@@ -1,13 +1,27 @@
-import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import L from 'leaflet';
 import 'leaflet.markercluster';
 import { universities } from './data';
-import { Trophy, Info, Search, X, List, Map as MapIcon, ChevronRight, Globe, LayoutGrid, ListFilter as Filter, GraduationCap, HelpCircle } from 'lucide-react';
+import { Trophy, Info, Search, X, List, Map as MapIcon, ChevronRight, Globe, LayoutGrid, ListFilter as Filter, GraduationCap, HelpCircle, Heart, Plane, Train, ExternalLink, Sparkles, Loader2 } from 'lucide-react';
 import { ContactModal } from './components/ContactModal';
 import { AboutPage } from './components/AboutPage';
 import { cloudinaryUrls } from './cloudinaryUrls';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
+import Markdown from 'react-markdown';
+
+interface TravelSegment {
+  mode: string;
+  time: string;
+  cost: number;
+}
+
+interface TravelRoute {
+  stops: string[];
+  segments: TravelSegment[];
+  totalTime: string;
+  totalCost: number;
+}
 
 const allCountries = Array.from(new Set(universities.map(u => u.country))).sort();
 const allSpecializations = Array.from(new Set(universities.flatMap(u => u.specializations || []))).sort();
@@ -144,8 +158,31 @@ export default function App() {
   const mapRef = useRef<HTMLDivElement>(null);
   const leafletMap = useRef<L.Map | null>(null);
   const clusterGroupRef = useRef<any>(null);
-  const markersRef = useRef<Map<number, L.Marker>>(new Map());
+  const transportMarkersRef = useRef<L.LayerGroup | null>(null);
+  const markersRef = useRef<Map<number | string, L.Marker>>(new Map());
   const searchInputRef = useRef<HTMLInputElement>(null);
+  
+  const [showFlightWidget, setShowFlightWidget] = useState(false);
+  const [flightOrigin, setFlightOrigin] = useState('');
+  const [isEstimating, setIsEstimating] = useState(false);
+  const [travelEstimate, setTravelEstimate] = useState<TravelRoute | null>(null);
+  const [travelEstimateError, setTravelEstimateError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setFlightOrigin(localStorage.getItem('homeLocation') || '');
+  }, []);
+
+  useEffect(() => {
+    (window as any).openFlightsModal = () => {
+      setShowFlightWidget(true);
+      if (window.innerWidth < 768) {
+        setShowSidebar(true);
+      }
+    };
+    return () => {
+      delete (window as any).openFlightsModal;
+    };
+  }, []);
   
   const [searchQuery, setSearchQuery] = useState('');
   const [showSidebar, setShowSidebar] = useState(false);
@@ -162,6 +199,23 @@ export default function App() {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [preselectedUni, setPreselectedUni] = useState<string>('');
   const [showHelpPrompt, setShowHelpPrompt] = useState(false);
+  
+  const [favorites, setFavorites] = useState<(number | string)[]>(() => {
+    const saved = localStorage.getItem('favorites');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+
+  useEffect(() => {
+    localStorage.setItem('favorites', JSON.stringify(favorites));
+  }, [favorites]);
+
+  const toggleFavorite = (e: React.MouseEvent, rank: number | string) => {
+    e.stopPropagation();
+    setFavorites(prev => 
+      prev.includes(rank) ? prev.filter(r => r !== rank) : [...prev, rank]
+    );
+  };
 
   useEffect(() => {
     const hasSeenPrompt = localStorage.getItem('hasSeenHelpPrompt');
@@ -178,6 +232,44 @@ export default function App() {
   const handleDismissHelp = () => {
     setShowHelpPrompt(false);
     localStorage.setItem('hasSeenHelpPrompt', 'true');
+  };
+
+  const handleEstimateTravel = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!flightOrigin.trim() || !selectedUni) return;
+    localStorage.setItem('homeLocation', flightOrigin.trim());
+    
+    setIsEstimating(true);
+    setTravelEstimate(null);
+    setTravelEstimateError(null);
+
+    try {
+      const response = await fetch('/api/transport', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          origin: flightOrigin.trim(),
+          destinationName: selectedUni.name,
+          destinationCountry: selectedUni.country,
+          nearestAirport: selectedUni.nearest_airport?.name || 'unknown',
+          nearestTrainStation: selectedUni.nearest_train_station?.name || 'unknown'
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      const data = await response.json();
+      setTravelEstimate(data);
+    } catch (error) {
+      console.error("Error estimating travel:", error);
+      setTravelEstimateError("Sorry, I couldn't estimate the travel cost right now. Please try again later.");
+    } finally {
+      setIsEstimating(false);
+    }
   };
 
   const handleGoToAbout = () => {
@@ -218,6 +310,10 @@ export default function App() {
       list = list.filter(uni => uni.specializations?.includes(selectedSpecialization));
     }
     
+    if (showFavoritesOnly) {
+      list = list.filter(uni => favorites.includes(uni.europe_rank));
+    }
+    
     return list.sort((a, b) => {
       const getNumericRank = (rank: number | string) => {
         if (typeof rank === 'number') return rank;
@@ -227,7 +323,7 @@ export default function App() {
       if (rankingMode === 'europe') return getNumericRank(a.europe_rank) - getNumericRank(b.europe_rank);
       return getNumericRank(a.world_rank) - getNumericRank(b.world_rank);
     });
-  }, [searchQuery, rankingMode, selectedCountry, selectedSpecialization]);
+  }, [searchQuery, rankingMode, selectedCountry, selectedSpecialization, showFavoritesOnly, favorites]);
 
   useEffect(() => {
     if (!mapRef.current || leafletMap.current) return;
@@ -275,6 +371,8 @@ export default function App() {
       }
     }).addTo(leafletMap.current);
 
+    transportMarkersRef.current = L.layerGroup().addTo(leafletMap.current);
+
     L.control.zoom({ position: 'bottomright' }).addTo(leafletMap.current);
 
     return () => {
@@ -299,6 +397,61 @@ export default function App() {
       setShowSidebar(false);
     }
   }, []);
+
+  useEffect(() => {
+    if (!leafletMap.current || !transportMarkersRef.current) return;
+
+    transportMarkersRef.current.clearLayers();
+
+    if (selectedUni) {
+      const bounds = L.latLngBounds([selectedUni.lat, selectedUni.lng], [selectedUni.lat, selectedUni.lng]);
+
+      if (selectedUni.nearest_airport) {
+        const airportIcon = L.divIcon({
+          className: 'custom-div-icon',
+          html: `
+            <div class="flex items-center justify-center w-8 h-8 rounded-full shadow-lg bg-sky-500 border-2 border-white z-[1000]">
+              <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.2-1.1.6L3 8l7 4-3 3-3.5-1.5L2 15l5 2 2 5 1.5-1.5-1.5-3.5 3-3 4 7c.4-.2.7-.6.6-1.1z"/></svg>
+            </div>
+          `,
+          iconSize: [32, 32],
+          iconAnchor: [16, 16],
+          popupAnchor: [0, -16]
+        });
+        const marker = L.marker([selectedUni.nearest_airport.lat, selectedUni.nearest_airport.lng], { icon: airportIcon })
+          .bindPopup(`<b>${selectedUni.nearest_airport.name}</b><br/>Nearest Airport ${selectedUni.nearest_airport.distance_km !== undefined ? `(${selectedUni.nearest_airport.distance_km} km)` : ''}<br/><button onclick="window.openFlightsModal()" style="display: inline-block; margin-top: 5px; color: #9333ea; background: none; border: none; padding: 0; font-weight: bold; font-size: 12px; cursor: pointer;">✨ Estimate Travel Cost</button>`);
+        transportMarkersRef.current.addLayer(marker);
+        bounds.extend([selectedUni.nearest_airport.lat, selectedUni.nearest_airport.lng]);
+      }
+
+      if (selectedUni.nearest_train_station) {
+        const trainIcon = L.divIcon({
+          className: 'custom-div-icon',
+          html: `
+            <div class="flex items-center justify-center w-8 h-8 rounded-full shadow-lg bg-emerald-500 border-2 border-white z-[1000]">
+              <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="16" x="4" y="3" rx="2"/><path d="M4 11h16"/><path d="M12 3v8"/><path d="m8 19-2 3"/><path d="m18 22-2-3"/><path d="M8 15h0"/><path d="M16 15h0"/></svg>
+            </div>
+          `,
+          iconSize: [32, 32],
+          iconAnchor: [16, 16],
+          popupAnchor: [0, -16]
+        });
+        const marker = L.marker([selectedUni.nearest_train_station.lat, selectedUni.nearest_train_station.lng], { icon: trainIcon })
+          .bindPopup(`<b>${selectedUni.nearest_train_station.name}</b><br/>Nearest Train Station ${selectedUni.nearest_train_station.distance_km !== undefined ? `(${selectedUni.nearest_train_station.distance_km} km)` : ''}`);
+        transportMarkersRef.current.addLayer(marker);
+        bounds.extend([selectedUni.nearest_train_station.lat, selectedUni.nearest_train_station.lng]);
+      }
+
+      if (selectedUni.nearest_airport || selectedUni.nearest_train_station) {
+        // Use a small timeout to allow zoomToShowLayer to finish its animation
+        setTimeout(() => {
+          if (leafletMap.current) {
+            leafletMap.current.fitBounds(bounds, { padding: [50, 50], maxZoom: 13 });
+          }
+        }, 300);
+      }
+    }
+  }, [selectedUni]);
 
   useEffect(() => {
     if (!leafletMap.current || !clusterGroupRef.current) return;
@@ -342,6 +495,8 @@ export default function App() {
 
       marker.on('click', () => {
         setSelectedUni(uni);
+        setShowFlightWidget(false);
+        setTravelEstimate(null);
       });
 
       clusterGroupRef.current.addLayer(marker);
@@ -470,6 +625,20 @@ export default function App() {
 
             <div className={`relative ${isMobileSearchOpen ? 'hidden' : 'block'}`}>
               <button 
+                onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
+                className={`p-2 rounded-xl border transition-all flex items-center justify-center w-[36px] h-[36px] ${
+                  showFavoritesOnly 
+                    ? 'bg-red-50 border-red-200 text-red-500' 
+                    : 'bg-slate-100 border-slate-200 text-slate-600'
+                }`}
+                title="Show Favorites"
+              >
+                <Heart className={`w-4 h-4 ${showFavoritesOnly ? 'fill-current' : ''}`} />
+              </button>
+            </div>
+
+            <div className={`relative ${isMobileSearchOpen ? 'hidden' : 'block'}`}>
+              <button 
                 onClick={() => {
                   setTempCountry(selectedCountry);
                   setTempSpecialization(selectedSpecialization);
@@ -581,10 +750,18 @@ export default function App() {
               const rankTextClass = isTwoPartWorldRank ? 'text-[10px] tracking-tighter leading-none text-center px-0.5' : 'text-xs';
               
               return (
-                <button
+                <div
                   key={uni.europe_rank}
                   onClick={() => focusUniversity(uni)}
-                  className="w-full text-left p-4 border-b transition-all group flex items-center gap-4 border-slate-50 hover:bg-blue-50/50"
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      focusUniversity(uni);
+                    }
+                  }}
+                  className="w-full text-left p-4 border-b transition-all group flex items-center gap-4 border-slate-50 hover:bg-blue-50/50 cursor-pointer"
                 >
                   <UniversityImage 
                     uni={uni} 
@@ -610,8 +787,14 @@ export default function App() {
                       </span>
                     </div>
                   </div>
+                  <button 
+                    onClick={(e) => toggleFavorite(e, uni.europe_rank)}
+                    className="p-2 -mr-2 text-slate-300 hover:text-red-500 transition-colors"
+                  >
+                    <Heart className={`w-4 h-4 ${favorites.includes(uni.europe_rank) ? 'fill-red-500 text-red-500' : ''}`} />
+                  </button>
                   <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0 text-slate-300" />
-                </button>
+                </div>
               );
             })}
             {filteredUniversities.length === 0 && (
@@ -683,9 +866,17 @@ export default function App() {
               </div>
               <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
                 <DetailsImage uni={selectedUni} />
-                <div className="flex items-center gap-3 mb-6">
-                  <img src={`https://flagcdn.com/w40/${getCountryCode(selectedUni.country)}.png`} alt={selectedUni.country} className="w-10 h-auto rounded-sm shadow-md" />
-                  <h2 className="text-2xl font-bold leading-tight text-slate-900">{selectedUni.name}</h2>
+                <div className="flex items-center justify-between gap-3 mb-6">
+                  <div className="flex items-center gap-3">
+                    <img src={`https://flagcdn.com/w40/${getCountryCode(selectedUni.country)}.png`} alt={selectedUni.country} className="w-10 h-auto rounded-sm shadow-md" />
+                    <h2 className="text-2xl font-bold leading-tight text-slate-900">{selectedUni.name}</h2>
+                  </div>
+                  <button 
+                    onClick={(e) => toggleFavorite(e, selectedUni.europe_rank)}
+                    className="p-2 rounded-full hover:bg-slate-100 transition-colors shrink-0"
+                  >
+                    <Heart className={`w-6 h-6 ${favorites.includes(selectedUni.europe_rank) ? 'fill-red-500 text-red-500' : 'text-slate-400'}`} />
+                  </button>
                 </div>
                 
                 <div className="space-y-6">
@@ -729,6 +920,148 @@ export default function App() {
                             {spec}
                           </span>
                         ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {(selectedUni.nearest_airport || selectedUni.nearest_train_station) && (
+                    <div className="pt-4 border-t border-slate-100">
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Transport</h3>
+                      <div className="space-y-3">
+                        {selectedUni.nearest_airport && (
+                          <div className="flex items-start gap-3">
+                            <div className="p-2 bg-sky-50 text-sky-600 rounded-lg shrink-0">
+                              <Plane className="w-4 h-4" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-slate-800">
+                                {selectedUni.nearest_airport.name}
+                              </p>
+                              <p className="text-xs text-slate-500">
+                                Nearest Airport {selectedUni.nearest_airport.distance_km !== undefined ? `(${selectedUni.nearest_airport.distance_km} km)` : ''}
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                        {selectedUni.nearest_train_station && (
+                          <div className="flex items-start gap-3">
+                            <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg shrink-0">
+                              <Train className="w-4 h-4" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-slate-800">
+                                {selectedUni.nearest_train_station.name}
+                              </p>
+                              <p className="text-xs text-slate-500">
+                                Nearest Train Station {selectedUni.nearest_train_station.distance_km !== undefined ? `(${selectedUni.nearest_train_station.distance_km} km)` : ''}
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="mt-4 p-3 bg-purple-50/30 rounded-xl border border-purple-100">
+                        <button 
+                          onClick={() => {
+                            setShowFlightWidget(!showFlightWidget);
+                          }}
+                          className="w-full flex items-center justify-center gap-2 text-sm font-bold text-purple-700 hover:text-purple-800 transition-colors bg-purple-100/50 hover:bg-purple-100 px-3 py-2 rounded-lg"
+                        >
+                          <Sparkles className="w-4 h-4" />
+                          Estimate Travel Cost
+                        </button>
+                        
+                        {showFlightWidget && (
+                          <div className="mt-3 animate-in fade-in slide-in-from-top-2 duration-200">
+                            <form 
+                              onSubmit={handleEstimateTravel} 
+                              className="mb-3"
+                            >
+                              <label className="block text-[10px] font-bold text-purple-800 uppercase tracking-wider mb-1.5">Where are you traveling from?</label>
+                              <div className="flex gap-2">
+                                <input
+                                  type="text"
+                                  value={flightOrigin}
+                                  onChange={(e) => setFlightOrigin(e.target.value)}
+                                  placeholder="e.g. Warsaw or WAW"
+                                  className="flex-1 text-xs px-2.5 py-1.5 bg-white border border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
+                                  required
+                                />
+                                <button 
+                                  type="submit" 
+                                  disabled={isEstimating}
+                                  className="bg-purple-600 hover:bg-purple-700 disabled:bg-purple-400 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-colors shadow-sm flex items-center justify-center min-w-[70px]"
+                                >
+                                  {isEstimating ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Calculate'}
+                                </button>
+                              </div>
+                            </form>
+                            
+                            {travelEstimateError && (
+                              <div className="mt-3 text-xs text-red-500 font-medium">
+                                {travelEstimateError}
+                              </div>
+                            )}
+                            
+                            {travelEstimate && (
+                              <div className="mt-4 pt-4 border-t border-purple-200/50">
+                                <h4 className="text-[10px] font-bold text-purple-800 mb-4 uppercase tracking-wider">Fastest Route</h4>
+                                
+                                <div className="relative flex flex-col w-full pl-2 pb-2">
+                                  {travelEstimate.stops.map((stop, index) => (
+                                    <React.Fragment key={index}>
+                                      {/* Stop Node */}
+                                      <div className="flex items-center relative z-10">
+                                        <div className="w-3 h-3 rounded-full bg-purple-600 border-2 border-white shadow-sm shrink-0"></div>
+                                        <span className="ml-3 text-[11px] font-bold text-slate-700" title={stop}>
+                                          {stop}
+                                        </span>
+                                      </div>
+
+                                      {/* Segment Line */}
+                                      {index < travelEstimate.stops.length - 1 && (
+                                        <div className="flex items-center relative min-h-[40px] ml-1.5 border-l-2 border-purple-200 pl-4 py-2">
+                                          <div className="flex flex-col gap-0.5">
+                                            <span className="text-[10px] font-semibold text-slate-500">
+                                              Time: {travelEstimate.segments[index].time}
+                                            </span>
+                                            <span className="text-[10px] font-semibold text-green-600">
+                                              Cost: €{travelEstimate.segments[index].cost}
+                                            </span>
+                                          </div>
+                                        </div>
+                                      )}
+                                    </React.Fragment>
+                                  ))}
+                                </div>
+                                
+                                {/* Totals */}
+                                <div className="mt-6 flex justify-between items-center bg-white p-2.5 rounded-lg border border-purple-100 shadow-sm">
+                                  <div>
+                                    <span className="block text-[9px] text-purple-600 font-bold uppercase">Total Time</span>
+                                    <span className="text-xs font-bold text-slate-800">{travelEstimate.totalTime}</span>
+                                  </div>
+                                  <div className="text-right">
+                                    <span className="block text-[9px] text-purple-600 font-bold uppercase">Total Cost</span>
+                                    <span className="text-xs font-bold text-green-600">€{travelEstimate.totalCost}</span>
+                                  </div>
+                                </div>
+                                
+                                <div className="mt-4 pt-3 border-t border-purple-200/50 flex justify-end">
+                                  <a 
+                                    href={`https://www.google.com/travel/flights?q=Flights%20from%20${encodeURIComponent(flightOrigin.trim())}%20to%20${encodeURIComponent(selectedUni.nearest_airport?.name || selectedUni.name)}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-600 hover:text-blue-800 transition-colors"
+                                  >
+                                    <ExternalLink className="w-3 h-3" />
+                                    Check actual prices on Google Flights
+                                  </a>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
