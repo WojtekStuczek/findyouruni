@@ -15,15 +15,16 @@ export default async function handler(req: any, res: any) {
 
     const ai = new GoogleGenAI({ apiKey });
     
-    const prompt = `
-      I am planning to travel from ${origin} to ${destinationName} located in ${destinationCountry}.
-      While the nearest major airport is ${nearestAirport} and the nearest train station is ${nearestTrainStation}, YOU MUST PRIORITIZE THE ABSOLUTE CHEAPEST ROUTE.
-      
-      CRITICAL INSTRUCTION: Actively consider alternative low-cost airline hubs (like Ryanair, Wizz Air, easyJet) that might be slightly further away but offer significantly cheaper flights. For example, if traveling to Delft or Amsterdam, strongly consider Eindhoven airport if it's cheaper. If traveling to London, consider Stansted or Luton, etc.
-      
-      Provide the single best travel option that prioritizes LOW COST above all, while keeping the total travel time reasonable. Include the train/bus transfers from the low-cost airport to the final destination.
-      Break it down into stops and segments.
-    `;
+  const prompt = `
+  I am planning to travel from ${origin} to ${destinationName}, ${destinationCountry}.
+  Nearest major airport: ${nearestAirport}. Nearest train station: ${nearestTrainStation}.
+
+  Find the CHEAPEST realistic route. Always check low-cost airline hubs (Ryanair, Wizz Air, easyJet, etc.) — even if further from the destination — if they offer meaningfully cheaper fares with reasonable transfers.
+
+  IMPORTANT: Show realistic current market prices. Do not underestimate costs — if unsure, round up rather than down.
+
+  Break the route into segments with estimated cost and duration for each leg, plus total cost and total travel time.
+`;
 
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
