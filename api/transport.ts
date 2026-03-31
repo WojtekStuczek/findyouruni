@@ -17,9 +17,11 @@ export default async function handler(req: any, res: any) {
     
     const prompt = `
       I am planning to travel from ${origin} to ${destinationName} located in ${destinationCountry}.
-      The nearest airport is ${nearestAirport} and the nearest train station is ${nearestTrainStation}.
+      While the nearest major airport is ${nearestAirport} and the nearest train station is ${nearestTrainStation}, YOU MUST PRIORITIZE THE ABSOLUTE CHEAPEST ROUTE.
       
-      Provide the single best travel option that is both budget-friendly and fast (the optimal balance of low cost and short travel time).
+      CRITICAL INSTRUCTION: Actively consider alternative low-cost airline hubs (like Ryanair, Wizz Air, easyJet) that might be slightly further away but offer significantly cheaper flights. For example, if traveling to Delft or Amsterdam, strongly consider Eindhoven airport if it's cheaper. If traveling to London, consider Stansted or Luton, etc.
+      
+      Provide the single best travel option that prioritizes LOW COST above all, while keeping the total travel time reasonable. Include the train/bus transfers from the low-cost airport to the final destination.
       Break it down into stops and segments.
     `;
 
