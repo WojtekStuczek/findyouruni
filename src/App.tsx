@@ -53,7 +53,6 @@ const UniversityImage = ({ uni, rank, isHighRank, rankTextClass, className }: an
       <img
         src={photoUrl}
         alt={uni.name}
-        loading="lazy"
         onLoad={() => setLoaded(true)}
         onError={() => setError(true)}
         className={`w-full h-full object-cover transition-all duration-300 group-hover:scale-110 ${loaded ? 'opacity-100' : 'opacity-0 absolute'}`}
@@ -89,7 +88,6 @@ const DetailsImage = ({ uni }: { uni: any }) => {
         src={thumbUrl}
         alt=""
         aria-hidden="true"
-        loading="lazy"
         className={`absolute inset-0 w-full h-full object-cover scale-110 blur-sm transition-opacity duration-500 ${fullLoaded ? 'opacity-0' : 'opacity-100'}`}
       />
       {/* Pełne zdjęcie - pojawia się po załadowaniu */}
@@ -97,7 +95,6 @@ const DetailsImage = ({ uni }: { uni: any }) => {
         key={uni.europe_rank}
         src={fullUrl}
         alt={uni.name}
-        loading="lazy"
         onLoad={() => setFullLoaded(true)}
         onError={() => setError(true)}
         className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${fullLoaded ? 'opacity-100' : 'opacity-0'}`}
@@ -193,11 +190,6 @@ export default function App() {
   const [rankingMode, setRankingMode] = useState<'europe' | 'world'>('europe');
   const [selectedUni, setSelectedUni] = useState<typeof universities[0] | null>(null);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
-  const [visibleCount, setVisibleCount] = useState(20);
-
-  useEffect(() => {
-    setVisibleCount(20);
-  }, [searchQuery, rankingMode, selectedCountry, selectedSpecialization, showFavoritesOnly]);
   
   const [selectedCountry, setSelectedCountry] = useState<string>('');
   const [selectedSpecialization, setSelectedSpecialization] = useState<string>('');
@@ -745,7 +737,7 @@ export default function App() {
           showSidebar ? 'translate-x-0' : '-translate-x-full'
         }`}>
           <div className="flex-1 overflow-y-auto custom-scrollbar">
-            {filteredUniversities.slice(0, visibleCount).map((uni) => {
+            {filteredUniversities.map((uni) => {
               const getNumericRank = (rank: number | string) => {
                 if (typeof rank === 'number') return rank;
                 const match = rank.match(/\d+/);
@@ -783,7 +775,7 @@ export default function App() {
                       {uni.name}
                     </h3>
                     <p className="text-xs flex items-center gap-1.5 mt-0.5 text-slate-500">
-                      <img src={`https://flagcdn.com/w40/${getCountryCode(uni.country)}.png`} alt={uni.country} loading="lazy" className="w-4 h-auto rounded-[2px] shadow-sm" />
+                      <img src={`https://flagcdn.com/w40/${getCountryCode(uni.country)}.png`} alt={uni.country} className="w-4 h-auto rounded-[2px] shadow-sm" />
                       <span>{uni.country}</span>
                     </p>
                     <div className="flex items-center gap-2 mt-1.5">
@@ -805,16 +797,6 @@ export default function App() {
                 </div>
               );
             })}
-            {visibleCount < filteredUniversities.length && (
-              <div className="p-4 text-center">
-                <button 
-                  onClick={() => setVisibleCount(prev => prev + 20)}
-                  className="px-6 py-2 bg-blue-50 text-blue-600 rounded-full text-sm font-bold hover:bg-blue-100 transition-colors"
-                >
-                  Load More
-                </button>
-              </div>
-            )}
             {filteredUniversities.length === 0 && (
               <div className="p-12 text-center">
                 <Search className="w-8 h-8 text-slate-300 mx-auto mb-3" />
@@ -886,7 +868,7 @@ export default function App() {
                 <DetailsImage uni={selectedUni} />
                 <div className="flex items-center justify-between gap-3 mb-6">
                   <div className="flex items-center gap-3">
-                    <img src={`https://flagcdn.com/w40/${getCountryCode(selectedUni.country)}.png`} alt={selectedUni.country} loading="lazy" className="w-10 h-auto rounded-sm shadow-md" />
+                    <img src={`https://flagcdn.com/w40/${getCountryCode(selectedUni.country)}.png`} alt={selectedUni.country} className="w-10 h-auto rounded-sm shadow-md" />
                     <h2 className="text-2xl font-bold leading-tight text-slate-900">{selectedUni.name}</h2>
                   </div>
                   <button 
