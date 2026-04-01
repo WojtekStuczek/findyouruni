@@ -25,7 +25,10 @@ async function startServer() {
         I am planning to travel from ${origin} to ${destinationName} located in ${destinationCountry}.
         While the nearest major airport is ${nearestAirport} and the nearest train station is ${nearestTrainStation}, YOU MUST PRIORITIZE THE ABSOLUTE CHEAPEST ROUTE.
         
-        CRITICAL INSTRUCTION: Actively consider alternative low-cost airline hubs (like Ryanair, Wizz Air, easyJet) that might be slightly further away but offer significantly cheaper flights. For example, if traveling to Delft or Amsterdam, strongly consider Eindhoven airport if it's cheaper. If traveling to London, consider Stansted or Luton, etc.
+        CRITICAL TRANSPORT PREFERENCE: Prioritize low-cost airlines (Ryanair, Wizz Air, easyJet) and trains. Avoid long-distance buses unless absolutely necessary.
+        Actively consider alternative low-cost airline hubs that might be slightly further away but offer significantly cheaper flights (e.g., Eindhoven for Delft/Amsterdam, Stansted/Luton for London).
+        
+        IMPORTANT PRICING INSTRUCTION: Provide the most accurate, realistic current market prices. Use the median/average price for the tickets (not the absolute lowest promotional fare that is rarely available, nor the most expensive). Do not underestimate costs.
         
         Provide the single best travel option that prioritizes LOW COST above all, while keeping the total travel time reasonable. Include the train/bus transfers from the low-cost airport to the final destination.
         Break it down into stops and segments.

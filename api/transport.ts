@@ -19,9 +19,11 @@ export default async function handler(req: any, res: any) {
   I am planning to travel from ${origin} to ${destinationName}, ${destinationCountry}.
   Nearest major airport: ${nearestAirport}. Nearest train station: ${nearestTrainStation}.
 
-  Find the CHEAPEST realistic route. Always check low-cost airline hubs (Ryanair, Wizz Air, easyJet, etc.) — even if further from the destination — if they offer meaningfully cheaper fares with reasonable transfers.
+  Find the CHEAPEST realistic route. 
+  CRITICAL TRANSPORT PREFERENCE: Prioritize low-cost airlines (Ryanair, Wizz Air, easyJet, etc.) and trains. Avoid long-distance buses unless absolutely necessary or if there are no other viable options.
+  Always check low-cost airline hubs even if further from the destination, if they offer meaningfully cheaper fares with reasonable train transfers.
 
-  IMPORTANT: Show realistic current market prices. Do not underestimate costs — if unsure, round up rather than down.
+  IMPORTANT PRICING INSTRUCTION: Provide the most accurate, realistic current market prices. Use the median/average price for the tickets (not the absolute lowest promotional fare that is rarely available, nor the most expensive last-minute fare). Do not underestimate costs.
 
   Break the route into segments with estimated cost and duration for each leg, plus total cost and total travel time.
 `;
