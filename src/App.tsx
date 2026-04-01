@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react'
 import L from 'leaflet';
 import 'leaflet.markercluster';
 import { universities } from './data';
-import { Trophy, Info, Search, X, List, Map as MapIcon, ChevronRight, Globe, LayoutGrid, ListFilter as Filter, GraduationCap, HelpCircle, Heart, Plane, Train, ExternalLink, Sparkles, Loader2 } from 'lucide-react';
+import { Trophy, Info, Search, X, List, Map as MapIcon, ChevronRight, Globe, LayoutGrid, ListFilter as Filter, GraduationCap, HelpCircle, Heart, Plane, Train, Bus, Car, Navigation, ExternalLink, Sparkles, Loader2 } from 'lucide-react';
 import { ContactModal } from './components/ContactModal';
 import { AboutPage } from './components/AboutPage';
 import { cloudinaryUrls } from './cloudinaryUrls';
@@ -167,6 +167,15 @@ export default function App() {
   const [isEstimating, setIsEstimating] = useState(false);
   const [travelEstimate, setTravelEstimate] = useState<TravelRoute | null>(null);
   const [travelEstimateError, setTravelEstimateError] = useState<string | null>(null);
+
+  const getTransportIcon = (mode: string) => {
+    const lowerMode = mode.toLowerCase();
+    if (lowerMode.includes('flight') || lowerMode.includes('plane') || lowerMode.includes('air')) return <Plane className="w-3 h-3" />;
+    if (lowerMode.includes('train') || lowerMode.includes('rail')) return <Train className="w-3 h-3" />;
+    if (lowerMode.includes('bus') || lowerMode.includes('coach')) return <Bus className="w-3 h-3" />;
+    if (lowerMode.includes('car') || lowerMode.includes('drive') || lowerMode.includes('taxi')) return <Car className="w-3 h-3" />;
+    return <Navigation className="w-3 h-3" />;
+  };
 
   useEffect(() => {
     setFlightOrigin(localStorage.getItem('homeLocation') || '');
@@ -1020,10 +1029,13 @@ export default function App() {
 
                                       {/* Segment Line */}
                                       {index < travelEstimate.stops.length - 1 && (
-                                        <div className="flex items-center relative min-h-[40px] ml-1.5 border-l-2 border-purple-200 pl-4 py-2">
+                                        <div className="flex items-center relative min-h-[40px] ml-1.5 border-l-2 border-purple-200 pl-6 py-2">
+                                          <div className="absolute -left-[11px] bg-white p-1 rounded-full border border-purple-200 text-purple-600 shadow-sm">
+                                            {getTransportIcon(travelEstimate.segments[index].mode)}
+                                          </div>
                                           <div className="flex flex-col gap-0.5">
-                                            <span className="text-[10px] font-semibold text-slate-500">
-                                              Time: {travelEstimate.segments[index].time}
+                                            <span className="text-[10px] font-semibold text-slate-500 flex items-center gap-1">
+                                              <span className="font-bold text-slate-700">{travelEstimate.segments[index].mode}</span> • {travelEstimate.segments[index].time}
                                             </span>
                                             <span className="text-[10px] font-semibold text-green-600">
                                               Cost: €{travelEstimate.segments[index].cost}
