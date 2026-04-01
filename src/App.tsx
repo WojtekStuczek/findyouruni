@@ -541,7 +541,7 @@ export default function App() {
   return (
     <>
       {currentPage === 'about' && <AboutPage onBack={() => setCurrentPage('home')} />}
-      <div className={`relative h-[100dvh] w-screen flex flex-col bg-slate-50 ${currentPage === 'about' ? 'hidden' : ''}`}>
+      <div className={`relative h-[100vh] w-screen flex flex-col bg-slate-50 ${currentPage === 'about' ? 'hidden' : ''}`}>
       {/* Header */}
       <header className="z-[1001] border-b px-4 md:px-6 py-3 md:py-4 shadow-sm flex flex-row items-center justify-between gap-2 md:gap-4 bg-white/90 border-slate-200 text-slate-900 backdrop-blur-md">
         <div className={`flex items-center gap-2 md:gap-3 ${isMobileSearchOpen ? 'hidden md:flex' : 'flex'}`}>
