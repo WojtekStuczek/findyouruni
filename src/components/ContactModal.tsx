@@ -128,7 +128,7 @@ export function ContactModal({ isOpen, onClose, initialUniversities = '' }: Cont
 
   return (
     <div className="fixed inset-0 z-[3000] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[90dvh]">
         <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-slate-50">
           <h2 className="font-bold text-lg text-slate-800">Application Assistance</h2>
           <button 
@@ -158,7 +158,7 @@ export function ContactModal({ isOpen, onClose, initialUniversities = '' }: Cont
           </div>
         ) : (
           <>
-            <div className="p-6 overflow-y-auto custom-scrollbar">
+            <div className="p-6 overflow-y-auto custom-scrollbar pb-24">
               <form id="contact-form" onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -329,7 +329,7 @@ export function ContactModal({ isOpen, onClose, initialUniversities = '' }: Cont
               </form>
             </div>
             
-            <div className="p-4 border-t border-slate-100 bg-slate-50 flex justify-end">
+            <div className="p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] border-t border-slate-100 bg-slate-50 flex justify-end">
               <button
                 type="submit"
                 form="contact-form"

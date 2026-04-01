@@ -26,9 +26,9 @@ async function startServer() {
         While the nearest major airport is ${nearestAirport} and the nearest train station is ${nearestTrainStation}, YOU MUST PRIORITIZE THE ABSOLUTE CHEAPEST ROUTE.
         
         CRITICAL TRANSPORT PREFERENCE: Prioritize low-cost airlines (Ryanair, Wizz Air, easyJet) and trains. Avoid long-distance buses unless absolutely necessary.
-        Actively consider alternative low-cost airline hubs that might be slightly further away but offer significantly cheaper flights (e.g., Eindhoven for Delft/Amsterdam, Stansted/Luton for London).
+        All flights MUST be direct (no layovers/connections). Actively consider alternative low-cost airline hubs that might be slightly further away but offer significantly cheaper direct flights (e.g., Eindhoven for Delft/Amsterdam, Stansted/Luton for London).
         
-        IMPORTANT PRICING INSTRUCTION: Provide the most accurate, realistic current market prices. Use the median/average price for the tickets (not the absolute lowest promotional fare that is rarely available, nor the most expensive). Do not underestimate costs.
+        IMPORTANT PRICING INSTRUCTION: Provide realistic average market prices for a ticket booked a few weeks in advance. Do not artificially inflate or overestimate prices, especially for trains. Give a fair, typical price (not the absolute lowest promotional fare, nor the most expensive last-minute fare).
         
         Provide the single best travel option that prioritizes LOW COST above all, while keeping the total travel time reasonable. Include the train/bus transfers from the low-cost airport to the final destination.
         Break it down into stops and segments.

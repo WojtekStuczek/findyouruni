@@ -21,9 +21,9 @@ export default async function handler(req: any, res: any) {
 
   Find the CHEAPEST realistic route. 
   CRITICAL TRANSPORT PREFERENCE: Prioritize low-cost airlines (Ryanair, Wizz Air, easyJet, etc.) and trains. Avoid long-distance buses unless absolutely necessary or if there are no other viable options.
-  Always check low-cost airline hubs even if further from the destination, if they offer meaningfully cheaper fares with reasonable train transfers.
+  All flights MUST be direct (no layovers/connections). Always check low-cost airline hubs even if further from the destination, if they offer meaningfully cheaper direct fares with reasonable train transfers.
 
-  IMPORTANT PRICING INSTRUCTION: Provide the most accurate, realistic current market prices. Use the median/average price for the tickets (not the absolute lowest promotional fare that is rarely available, nor the most expensive last-minute fare). Do not underestimate costs.
+  IMPORTANT PRICING INSTRUCTION: Provide realistic average market prices for a ticket booked a few weeks in advance. Do not artificially inflate or overestimate prices, especially for trains. Give a fair, typical price (not the absolute lowest promotional fare, nor the most expensive last-minute fare).
 
   Break the route into segments with estimated cost and duration for each leg, plus total cost and total travel time.
 `;

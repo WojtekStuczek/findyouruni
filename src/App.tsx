@@ -167,6 +167,7 @@ export default function App() {
   const [isEstimating, setIsEstimating] = useState(false);
   const [travelEstimate, setTravelEstimate] = useState<TravelRoute | null>(null);
   const [travelEstimateError, setTravelEstimateError] = useState<string | null>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   const getTransportIcon = (mode: string) => {
     const lowerMode = mode.toLowerCase();
@@ -180,6 +181,20 @@ export default function App() {
   useEffect(() => {
     setFlightOrigin(localStorage.getItem('homeLocation') || '');
   }, []);
+
+  useEffect(() => {
+    if (selectedUni) {
+      setDisplayedUni(selectedUni);
+    }
+  }, [selectedUni]);
+
+  useEffect(() => {
+    if (travelEstimate && resultsRef.current) {
+      setTimeout(() => {
+        resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 100);
+    }
+  }, [travelEstimate]);
 
   useEffect(() => {
     (window as any).openFlightsModal = () => {
@@ -198,6 +213,7 @@ export default function App() {
   const [currentPage, setCurrentPage] = useState<'home' | 'about'>('home');
   const [rankingMode, setRankingMode] = useState<'europe' | 'world'>('europe');
   const [selectedUni, setSelectedUni] = useState<typeof universities[0] | null>(null);
+  const [displayedUni, setDisplayedUni] = useState<typeof universities[0] | null>(null);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   
   const [selectedCountry, setSelectedCountry] = useState<string>('');
@@ -245,7 +261,7 @@ export default function App() {
 
   const handleEstimateTravel = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!flightOrigin.trim() || !selectedUni) return;
+    if (!flightOrigin.trim() || !displayedUni) return;
     localStorage.setItem('homeLocation', flightOrigin.trim());
     
     setIsEstimating(true);
@@ -260,10 +276,10 @@ export default function App() {
         },
         body: JSON.stringify({
           origin: flightOrigin.trim(),
-          destinationName: selectedUni.name,
-          destinationCountry: selectedUni.country,
-          nearestAirport: selectedUni.nearest_airport?.name || 'unknown',
-          nearestTrainStation: selectedUni.nearest_train_station?.name || 'unknown'
+          destinationName: displayedUni.name,
+          destinationCountry: displayedUni.country,
+          nearestAirport: displayedUni.nearest_airport?.name || 'unknown',
+          nearestTrainStation: displayedUni.nearest_train_station?.name || 'unknown'
         }),
       });
 
@@ -525,7 +541,7 @@ export default function App() {
   return (
     <>
       {currentPage === 'about' && <AboutPage onBack={() => setCurrentPage('home')} />}
-      <div className={`relative h-screen w-screen flex flex-col bg-slate-50 ${currentPage === 'about' ? 'hidden' : ''}`}>
+      <div className={`relative h-[100dvh] w-screen flex flex-col bg-slate-50 ${currentPage === 'about' ? 'hidden' : ''}`}>
       {/* Header */}
       <header className="z-[1001] border-b px-4 md:px-6 py-3 md:py-4 shadow-sm flex flex-row items-center justify-between gap-2 md:gap-4 bg-white/90 border-slate-200 text-slate-900 backdrop-blur-md">
         <div className={`flex items-center gap-2 md:gap-3 ${isMobileSearchOpen ? 'hidden md:flex' : 'flex'}`}>
@@ -745,7 +761,7 @@ export default function App() {
         <aside className={`z-[1000] absolute inset-y-0 left-0 w-full md:w-80 lg:w-96 transition-transform duration-300 transform bg-white border-r border-slate-200 flex flex-col shadow-2xl ${
           showSidebar ? 'translate-x-0' : '-translate-x-full'
         }`}>
-          <div className="flex-1 overflow-y-auto custom-scrollbar">
+          <div className="flex-1 overflow-y-auto custom-scrollbar pb-24">
             {filteredUniversities.map((uni) => {
               const getNumericRank = (rank: number | string) => {
                 if (typeof rank === 'number') return rank;
@@ -813,7 +829,7 @@ export default function App() {
               </div>
             )}
           </div>
-          <div className="p-4 border-t border-slate-100 bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-10 hidden">
+          <div className="p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] border-t border-slate-100 bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-10 hidden">
             <button
               onClick={() => { setPreselectedUni(''); setIsContactModalOpen(true); }}
               className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-xl font-bold text-sm transition-colors shadow-md shadow-blue-200"
@@ -863,7 +879,7 @@ export default function App() {
         <aside className={`z-[1000] absolute inset-y-0 right-0 w-full md:w-80 lg:w-96 transition-transform duration-300 transform bg-white border-l border-slate-200 flex flex-col shadow-2xl ${
           selectedUni ? 'translate-x-0' : 'translate-x-full'
         }`}>
-          {selectedUni && (
+          {displayedUni && (
             <>
               <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
                 <h2 className="font-bold text-sm uppercase tracking-wider text-slate-500">
@@ -873,58 +889,58 @@ export default function App() {
                   <X className="w-5 h-5" />
                 </button>
               </div>
-              <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
-                <DetailsImage uni={selectedUni} />
+              <div className="flex-1 overflow-y-auto custom-scrollbar p-6 pb-24">
+                <DetailsImage uni={displayedUni} />
                 <div className="flex items-center justify-between gap-3 mb-6">
                   <div className="flex items-center gap-3">
-                    <img src={`https://flagcdn.com/w40/${getCountryCode(selectedUni.country)}.png`} alt={selectedUni.country} className="w-10 h-auto rounded-sm shadow-md" />
-                    <h2 className="text-2xl font-bold leading-tight text-slate-900">{selectedUni.name}</h2>
+                    <img src={`https://flagcdn.com/w40/${getCountryCode(displayedUni.country)}.png`} alt={displayedUni.country} className="w-10 h-auto rounded-sm shadow-md" />
+                    <h2 className="text-2xl font-bold leading-tight text-slate-900">{displayedUni.name}</h2>
                   </div>
                   <button 
-                    onClick={(e) => toggleFavorite(e, selectedUni.europe_rank)}
+                    onClick={(e) => toggleFavorite(e, displayedUni.europe_rank)}
                     className="p-2 rounded-full hover:bg-slate-100 transition-colors shrink-0"
                   >
-                    <Heart className={`w-6 h-6 ${favorites.includes(selectedUni.europe_rank) ? 'fill-red-500 text-red-500' : 'text-slate-400'}`} />
+                    <Heart className={`w-6 h-6 ${favorites.includes(displayedUni.europe_rank) ? 'fill-red-500 text-red-500' : 'text-slate-400'}`} />
                   </button>
                 </div>
                 
                 <div className="space-y-6">
                   <div>
                     <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Location</h3>
-                    <p className="text-slate-700 font-medium">{selectedUni.country}</p>
+                    <p className="text-slate-700 font-medium">{displayedUni.country}</p>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
                       <h3 className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">World Rank</h3>
-                      <p className="text-xl font-bold text-slate-800">#{selectedUni.world_rank}</p>
+                      <p className="text-xl font-bold text-slate-800">#{displayedUni.world_rank}</p>
                     </div>
                     <div className="bg-blue-50 p-3 rounded-xl border border-blue-100">
                       <h3 className="text-[10px] font-bold uppercase tracking-wider text-blue-400 mb-1">Europe Rank</h3>
-                      <p className="text-xl font-bold text-blue-700">#{selectedUni.europe_rank}</p>
+                      <p className="text-xl font-bold text-blue-700">#{displayedUni.europe_rank}</p>
                     </div>
                   </div>
 
-                  {selectedUni.website && (
+                  {displayedUni.website && (
                     <div>
                       <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Website</h3>
                       <a 
-                        href={selectedUni.website} 
+                        href={displayedUni.website} 
                         target="_blank" 
                         rel="noopener noreferrer" 
                         className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium transition-colors"
                       >
                         <Globe className="w-4 h-4" />
-                        {selectedUni.website.replace(/^https?:\/\//, '')}
+                        {displayedUni.website.replace(/^https?:\/\//, '')}
                       </a>
                     </div>
                   )}
 
-                  {selectedUni.specializations && selectedUni.specializations.length > 0 && (
+                  {displayedUni.specializations && displayedUni.specializations.length > 0 && (
                     <div>
                       <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Top Specializations</h3>
                       <div className="flex flex-wrap gap-2">
-                        {selectedUni.specializations.map((spec, idx) => (
+                        {displayedUni.specializations.map((spec, idx) => (
                           <span key={idx} className="bg-slate-100 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-200">
                             {spec}
                           </span>
@@ -933,36 +949,36 @@ export default function App() {
                     </div>
                   )}
 
-                  {(selectedUni.nearest_airport || selectedUni.nearest_train_station) && (
+                  {(displayedUni.nearest_airport || displayedUni.nearest_train_station) && (
                     <div className="pt-4 border-t border-slate-100">
                       <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Transport</h3>
                       <div className="space-y-3">
-                        {selectedUni.nearest_airport && (
+                        {displayedUni.nearest_airport && (
                           <div className="flex items-start gap-3">
                             <div className="p-2 bg-sky-50 text-sky-600 rounded-lg shrink-0">
                               <Plane className="w-4 h-4" />
                             </div>
                             <div>
                               <p className="text-sm font-bold text-slate-800">
-                                {selectedUni.nearest_airport.name}
+                                {displayedUni.nearest_airport.name}
                               </p>
                               <p className="text-xs text-slate-500">
-                                Nearest Airport {selectedUni.nearest_airport.distance_km !== undefined ? `(${selectedUni.nearest_airport.distance_km} km)` : ''}
+                                Nearest Airport {displayedUni.nearest_airport.distance_km !== undefined ? `(${displayedUni.nearest_airport.distance_km} km)` : ''}
                               </p>
                             </div>
                           </div>
                         )}
-                        {selectedUni.nearest_train_station && (
+                        {displayedUni.nearest_train_station && (
                           <div className="flex items-start gap-3">
                             <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg shrink-0">
                               <Train className="w-4 h-4" />
                             </div>
                             <div>
                               <p className="text-sm font-bold text-slate-800">
-                                {selectedUni.nearest_train_station.name}
+                                {displayedUni.nearest_train_station.name}
                               </p>
                               <p className="text-xs text-slate-500">
-                                Nearest Train Station {selectedUni.nearest_train_station.distance_km !== undefined ? `(${selectedUni.nearest_train_station.distance_km} km)` : ''}
+                                Nearest Train Station {displayedUni.nearest_train_station.distance_km !== undefined ? `(${displayedUni.nearest_train_station.distance_km} km)` : ''}
                               </p>
                             </div>
                           </div>
@@ -1013,7 +1029,7 @@ export default function App() {
                             )}
                             
                             {travelEstimate && (
-                              <div className="mt-4 pt-4 border-t border-purple-200/50">
+                              <div className="mt-4 pt-4 border-t border-purple-200/50" ref={resultsRef}>
                                 <h4 className="text-[10px] font-bold text-purple-800 mb-4 uppercase tracking-wider">Fastest Route</h4>
                                 
                                 <div className="relative flex flex-col w-full pl-2 pb-2">
@@ -1061,7 +1077,7 @@ export default function App() {
                                 
                                 <div className="mt-4 pt-3 border-t border-purple-200/50 flex justify-end">
                                   <a 
-                                    href={`https://www.google.com/travel/flights?q=Flights%20from%20${encodeURIComponent(flightOrigin.trim())}%20to%20${encodeURIComponent(selectedUni.nearest_airport?.name || selectedUni.name)}`}
+                                    href={`https://www.google.com/travel/flights?q=Flights%20from%20${encodeURIComponent(flightOrigin.trim())}%20to%20${encodeURIComponent(displayedUni.nearest_airport?.name || displayedUni.name)}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-600 hover:text-blue-800 transition-colors"
@@ -1079,13 +1095,13 @@ export default function App() {
                   )}
                 </div>
               </div>
-              <div className="p-6 border-t border-slate-100 bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-10 hidden">
+              <div className="p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] border-t border-slate-100 bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-10 hidden">
                 <button
-                  onClick={() => { setPreselectedUni(selectedUni.name); setIsContactModalOpen(true); }}
+                  onClick={() => { setPreselectedUni(displayedUni.name); setIsContactModalOpen(true); }}
                   className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-xl font-bold text-sm transition-colors shadow-md shadow-blue-200"
                 >
                   <GraduationCap className="w-5 h-5" />
-                  Apply to {selectedUni.name}
+                  Apply to {displayedUni.name}
                 </button>
               </div>
             </>

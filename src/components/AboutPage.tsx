@@ -55,7 +55,7 @@ export function AboutPage({ onBack }: AboutPageProps) {
   };
 
   return (
-    <div className="h-screen overflow-y-auto bg-slate-50 text-slate-900">
+    <div className="h-[100dvh] overflow-y-auto bg-slate-50 text-slate-900 pb-24">
       {/* Header */}
       <header className="sticky top-0 z-50 border-b px-4 md:px-6 py-3 md:py-4 shadow-sm flex items-center gap-4 bg-white/90 backdrop-blur-md">
         <button 
