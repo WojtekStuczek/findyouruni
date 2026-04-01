@@ -185,7 +185,7 @@ export default function App() {
   useEffect(() => {
     if (travelEstimate && resultsRef.current) {
       setTimeout(() => {
-        resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }, 100);
     }
   }, [travelEstimate]);
@@ -761,7 +761,7 @@ export default function App() {
         <aside className={`z-[1000] absolute inset-y-0 left-0 w-full md:w-80 lg:w-96 transition-transform duration-300 transform bg-white border-r border-slate-200 flex flex-col shadow-2xl ${
           showSidebar ? 'translate-x-0' : '-translate-x-full'
         }`}>
-          <div className="flex-1 overflow-y-auto custom-scrollbar pb-24">
+          <div className="flex-1 overflow-y-auto custom-scrollbar pb-40">
             {filteredUniversities.map((uni) => {
               const getNumericRank = (rank: number | string) => {
                 if (typeof rank === 'number') return rank;
@@ -889,7 +889,7 @@ export default function App() {
                   <X className="w-5 h-5" />
                 </button>
               </div>
-              <div className="flex-1 overflow-y-auto custom-scrollbar p-6 pb-24">
+              <div className="flex-1 overflow-y-auto custom-scrollbar p-6 pb-40">
                 <DetailsImage uni={displayedUni} />
                 <div className="flex items-center justify-between gap-3 mb-6">
                   <div className="flex items-center gap-3">
