@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react'
 import L from 'leaflet';
 import 'leaflet.markercluster';
 import { universities } from './data';
-import { Trophy, Info, Search, X, List, Map as MapIcon, ChevronRight, Globe, LayoutGrid, ListFilter as Filter, GraduationCap, HelpCircle, Heart, Plane, Train, Bus, Car, Navigation, ExternalLink, Sparkles, Loader2 } from 'lucide-react';
+import { Trophy, Info, Search, X, List, Map as MapIcon, ChevronRight, ChevronLeft, Globe, LayoutGrid, ListFilter as Filter, GraduationCap, HelpCircle, Heart, Plane, Train, Bus, Car, Navigation, ExternalLink, Sparkles, Loader2 } from 'lucide-react';
 import { ContactModal } from './components/ContactModal';
 import { AboutPage } from './components/AboutPage';
 import { cloudinaryUrls } from './cloudinaryUrls';
@@ -219,6 +219,12 @@ export default function App() {
   useEffect(() => {
     if (selectedUni) {
       setDisplayedUni(selectedUni);
+      setTimeout(() => {
+        const container = document.getElementById('details-scroll-container');
+        if (container) {
+          container.scrollTop = 0;
+        }
+      }, 10);
     }
   }, [selectedUni]);
   
@@ -751,13 +757,6 @@ export default function App() {
                 </>
               )}
             </div>
-
-            <button
-              onClick={() => setShowSidebar(!showSidebar)}
-              className={`p-2 rounded-xl border transition-all md:hidden bg-slate-100 border-slate-200 text-slate-600 items-center justify-center w-[36px] h-[36px] ${isMobileSearchOpen ? 'hidden' : 'flex'}`}
-            >
-              {showSidebar ? <MapIcon className="w-4 h-4" /> : <List className="w-4 h-4" />}
-            </button>
           </div>
         </div>
       </header>
@@ -870,14 +869,28 @@ export default function App() {
             </div>
           </div>
 
-          {/* Floating Toggle Button (Desktop) */}
+          {/* Floating Toggle Button (Desktop & Mobile) */}
           <button
             onClick={() => setShowSidebar(!showSidebar)}
-            className={`hidden md:flex absolute top-1/2 -translate-y-1/2 z-[1000] w-12 h-12 bg-white border border-slate-200 rounded-full shadow-[0_0_15px_rgba(0,0,0,0.1)] items-center justify-center hover:bg-slate-50 hover:scale-110 transition-all duration-300 group ${
-              showSidebar ? 'left-80 lg:left-96 -translate-x-1/2' : 'left-4 translate-x-0'
+            className={`absolute z-[1005] bg-white border border-slate-200 rounded-full shadow-[0_0_15px_rgba(0,0,0,0.1)] flex items-center justify-center hover:bg-slate-50 hover:scale-105 transition-all duration-300 group font-bold text-sm text-slate-700 px-4 py-2.5 gap-2 ${
+              selectedUni ? 'hidden md:flex' : 'flex'
+            } ${
+              showSidebar 
+                ? 'bottom-6 left-1/2 -translate-x-1/2 md:bottom-auto md:top-1/2 md:-translate-y-1/2 md:left-80 lg:left-96 md:-translate-x-1/2' 
+                : 'bottom-6 left-1/2 -translate-x-1/2 md:bottom-auto md:top-1/2 md:-translate-y-1/2 md:left-4 md:translate-x-0'
             }`}
           >
-            <ChevronRight className={`w-6 h-6 text-slate-500 group-hover:text-blue-600 transition-transform duration-300 ${showSidebar ? 'rotate-180' : ''}`} />
+            {showSidebar ? (
+              <>
+                <ChevronLeft className="w-4 h-4 text-blue-600" />
+                <span>Hide</span>
+              </>
+            ) : (
+              <>
+                <List className="w-4 h-4 text-blue-600" />
+                <span>List</span>
+              </>
+            )}
           </button>
         </main>
 
