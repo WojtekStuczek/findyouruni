@@ -183,12 +183,6 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (selectedUni) {
-      setDisplayedUni(selectedUni);
-    }
-  }, [selectedUni]);
-
-  useEffect(() => {
     if (travelEstimate && resultsRef.current) {
       setTimeout(() => {
         resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -215,6 +209,12 @@ export default function App() {
   const [selectedUni, setSelectedUni] = useState<typeof universities[0] | null>(null);
   const [displayedUni, setDisplayedUni] = useState<typeof universities[0] | null>(null);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+
+  useEffect(() => {
+    if (selectedUni) {
+      setDisplayedUni(selectedUni);
+    }
+  }, [selectedUni]);
   
   const [selectedCountry, setSelectedCountry] = useState<string>('');
   const [selectedSpecialization, setSelectedSpecialization] = useState<string>('');
