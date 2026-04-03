@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react'
 import L from 'leaflet';
 import 'leaflet.markercluster';
 import { universities } from './data';
-import { Trophy, Info, Search, X, List, Map as MapIcon, ChevronRight, ChevronLeft, Globe, LayoutGrid, ListFilter as Filter, GraduationCap, HelpCircle, Heart, Plane, Train, Bus, Car, Navigation, ExternalLink, Sparkles, Loader2 } from 'lucide-react';
+import { Trophy, Info, Search, X, List, Map as MapIcon, ChevronRight, ChevronLeft, Globe, LayoutGrid, ListFilter as Filter, GraduationCap, HelpCircle, Heart, Plane, Train, Bus, Car, Navigation, ExternalLink, Sparkles, Loader2, Share2, Check } from 'lucide-react';
 import { ContactModal } from './components/ContactModal';
 import { AboutPage } from './components/AboutPage';
 import { cloudinaryUrls } from './cloudinaryUrls';
@@ -29,13 +29,22 @@ const allSpecializations = Array.from(new Set(universities.flatMap(u => u.specia
 const UniversityImage = ({ uni, rank, isHighRank, rankTextClass, className }: any) => {
   const [error, setError] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const imgRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
     setError(false);
     setLoaded(false);
   }, [uni.europe_rank]);
 
-  if (error) {
+  useEffect(() => {
+    if (imgRef.current?.complete) {
+      setLoaded(true);
+    }
+  }, [uni.europe_rank]);
+
+  const photoUrl = cloudinaryUrls[uni.europe_rank as keyof typeof cloudinaryUrls]?.thumb;
+
+  if (error || !photoUrl) {
     return (
       <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold shrink-0 shadow-sm transition-transform group-hover:scale-110 ${rankTextClass} ${
         isHighRank ? 'bg-amber-500 text-white' : 'bg-blue-50 text-blue-600'
@@ -45,17 +54,17 @@ const UniversityImage = ({ uni, rank, isHighRank, rankTextClass, className }: an
     );
   }
 
-  const photoUrl = cloudinaryUrls[uni.europe_rank as keyof typeof cloudinaryUrls]?.thumb;
-
   return (
-    <div className={`w-10 h-10 rounded-xl shrink-0 overflow-hidden shadow-sm ${className}`}>
-      {!loaded && <div className="w-full h-full bg-slate-200 animate-pulse" />}
+    <div className={`w-10 h-10 rounded-xl shrink-0 overflow-hidden shadow-sm relative ${className}`}>
+      {!loaded && <div className="absolute inset-0 bg-slate-200 animate-pulse" />}
       <img
+        ref={imgRef}
         src={photoUrl}
         alt={uni.name}
+        loading="lazy"
         onLoad={() => setLoaded(true)}
         onError={() => setError(true)}
-        className={`w-full h-full object-cover transition-all duration-300 group-hover:scale-110 ${loaded ? 'opacity-100' : 'opacity-0 absolute'}`}
+        className={`absolute inset-0 w-full h-full object-cover transition-all duration-300 group-hover:scale-110 ${loaded ? 'opacity-100' : 'opacity-0'}`}
       />
     </div>
   );
@@ -64,22 +73,29 @@ const UniversityImage = ({ uni, rank, isHighRank, rankTextClass, className }: an
 const DetailsImage = ({ uni }: { uni: any }) => {
   const [error, setError] = useState(false);
   const [fullLoaded, setFullLoaded] = useState(false);
+  const imgRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
     setError(false);
     setFullLoaded(false);
   }, [uni.europe_rank]);
 
-  if (error) {
+  useEffect(() => {
+    if (imgRef.current?.complete) {
+      setFullLoaded(true);
+    }
+  }, [uni.europe_rank]);
+
+  const thumbUrl = cloudinaryUrls[uni.europe_rank as keyof typeof cloudinaryUrls]?.thumb;
+  const fullUrl = cloudinaryUrls[uni.europe_rank as keyof typeof cloudinaryUrls]?.full;
+
+  if (error || !thumbUrl || !fullUrl) {
     return (
       <div className="w-full h-48 rounded-xl shadow-md mb-6 bg-blue-50 flex items-center justify-center border border-blue-100">
         <GraduationCap className="w-16 h-16 text-blue-200" />
       </div>
     );
   }
-
-  const thumbUrl = cloudinaryUrls[uni.europe_rank as keyof typeof cloudinaryUrls]?.thumb;
-  const fullUrl = cloudinaryUrls[uni.europe_rank as keyof typeof cloudinaryUrls]?.full;
 
   return (
     <div className="w-full h-48 rounded-xl shadow-md mb-6 overflow-hidden relative">
@@ -88,13 +104,16 @@ const DetailsImage = ({ uni }: { uni: any }) => {
         src={thumbUrl}
         alt=""
         aria-hidden="true"
+        loading="lazy"
         className={`absolute inset-0 w-full h-full object-cover scale-110 blur-sm transition-opacity duration-500 ${fullLoaded ? 'opacity-0' : 'opacity-100'}`}
       />
       {/* Pełne zdjęcie - pojawia się po załadowaniu */}
       <img
+        ref={imgRef}
         key={uni.europe_rank}
         src={fullUrl}
         alt={uni.name}
+        loading="lazy"
         onLoad={() => setFullLoaded(true)}
         onError={() => setError(true)}
         className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${fullLoaded ? 'opacity-100' : 'opacity-0'}`}
@@ -168,6 +187,7 @@ export default function App() {
   const [travelEstimate, setTravelEstimate] = useState<TravelRoute | null>(null);
   const [travelEstimateError, setTravelEstimateError] = useState<string | null>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
+  const [mapInitialized, setMapInitialized] = useState(false);
 
   const getTransportIcon = (mode: string) => {
     const lowerMode = mode.toLowerCase();
@@ -215,6 +235,16 @@ export default function App() {
   const [selectedUni, setSelectedUni] = useState<typeof universities[0] | null>(null);
   const [displayedUni, setDisplayedUni] = useState<typeof universities[0] | null>(null);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
+
+  const handleShare = () => {
+    if (displayedUni) {
+      // W przyszłości można tu dodać parametr w URL np. ?uni=id
+      navigator.clipboard.writeText(window.location.href);
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 2000);
+    }
+  };
 
   useEffect(() => {
     if (selectedUni) {
@@ -365,54 +395,64 @@ export default function App() {
   useEffect(() => {
     if (!mapRef.current || leafletMap.current) return;
 
-    const bounds = L.latLngBounds([34, -25], [72, 45]);
-    
-    leafletMap.current = L.map(mapRef.current, {
-      center: [46.8182, 8.2275],
-      zoom: window.innerWidth < 768 ? 3 : 5,
-      minZoom: 2,
-      maxZoom: 12,
-      maxBounds: bounds,
-      maxBoundsViscosity: 1.0,
-      worldCopyJump: false,
-      zoomControl: false,
-    });
+    const initMap = () => {
+      if (!mapRef.current || leafletMap.current) return;
+      
+      const bounds = L.latLngBounds([34, -25], [72, 45]);
+      
+      leafletMap.current = L.map(mapRef.current, {
+        center: [46.8182, 8.2275],
+        zoom: window.innerWidth < 768 ? 3 : 5,
+        minZoom: 2,
+        maxZoom: 12,
+        maxBounds: bounds,
+        maxBoundsViscosity: 1.0,
+        worldCopyJump: false,
+        zoomControl: false,
+      });
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-      maxZoom: 19,
-    }).addTo(leafletMap.current);
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        maxZoom: 19,
+      }).addTo(leafletMap.current);
 
-    // @ts-ignore
-    clusterGroupRef.current = L.markerClusterGroup({
-      showCoverageOnHover: false,
-      zoomToBoundsOnClick: true,
-      spiderfyOnMaxZoom: true,
-      chunkedLoading: true,
-      maxClusterRadius: 40,
-      iconCreateFunction: function (cluster) {
-        const childCount = cluster.getChildCount();
-        let c = ' marker-cluster-';
-        if (childCount < 10) {
-          c += 'small';
-        } else if (childCount < 100) {
-          c += 'medium';
-        } else {
-          c += 'large';
+      // @ts-ignore
+      clusterGroupRef.current = L.markerClusterGroup({
+        showCoverageOnHover: false,
+        zoomToBoundsOnClick: true,
+        spiderfyOnMaxZoom: true,
+        chunkedLoading: true,
+        maxClusterRadius: 40,
+        iconCreateFunction: function (cluster) {
+          const childCount = cluster.getChildCount();
+          let c = ' marker-cluster-';
+          if (childCount < 10) {
+            c += 'small';
+          } else if (childCount < 100) {
+            c += 'medium';
+          } else {
+            c += 'large';
+          }
+          return L.divIcon({
+            html: `<div><span>${childCount}</span></div>`,
+            className: 'marker-cluster' + c,
+            iconSize: L.point(40, 40)
+          });
         }
-        return L.divIcon({
-          html: `<div><span>${childCount}</span></div>`,
-          className: 'marker-cluster' + c,
-          iconSize: L.point(40, 40)
-        });
-      }
-    }).addTo(leafletMap.current);
+      }).addTo(leafletMap.current);
 
-    transportMarkersRef.current = L.layerGroup().addTo(leafletMap.current);
+      transportMarkersRef.current = L.layerGroup().addTo(leafletMap.current);
 
-    L.control.zoom({ position: 'bottomright' }).addTo(leafletMap.current);
+      L.control.zoom({ position: 'bottomright' }).addTo(leafletMap.current);
+      
+      setMapInitialized(true);
+    };
+
+    // Defer initialization to avoid layout thrashing (forced reflow) during initial render
+    const timerId = setTimeout(initMap, 50);
 
     return () => {
+      clearTimeout(timerId);
       if (leafletMap.current) {
         leafletMap.current.remove();
         leafletMap.current = null;
@@ -548,12 +588,12 @@ export default function App() {
         clusterGroupRef.current.zoomToShowLayer(marker);
       }
     }
-  }, [filteredUniversities, rankingMode]);
+  }, [filteredUniversities, rankingMode, mapInitialized]);
 
   return (
     <>
       {currentPage === 'about' && <AboutPage onBack={() => setCurrentPage('home')} />}
-      <div className={`relative h-[100vh] w-screen flex flex-col bg-slate-50 ${currentPage === 'about' ? 'hidden' : ''}`}>
+      <div className={`relative h-[100dvh] w-screen flex flex-col bg-slate-50 ${currentPage === 'about' ? 'hidden' : ''}`}>
       {/* Header */}
       <header className="z-[1001] border-b px-4 md:px-6 py-3 md:py-4 shadow-sm flex flex-row items-center justify-between gap-2 md:gap-4 bg-white/90 border-slate-200 text-slate-900 backdrop-blur-md">
         <div className={`flex items-center gap-2 md:gap-3 ${isMobileSearchOpen ? 'hidden md:flex' : 'flex'}`}>
@@ -766,7 +806,7 @@ export default function App() {
         <aside className={`z-[1000] absolute inset-y-0 left-0 w-full md:w-80 lg:w-96 transition-transform duration-300 transform bg-white border-r border-slate-200 flex flex-col shadow-2xl ${
           showSidebar ? 'translate-x-0' : '-translate-x-full'
         }`}>
-          <div className="flex-1 overflow-y-auto custom-scrollbar pb-28">
+          <div className="flex-1 overflow-y-auto custom-scrollbar">
             {filteredUniversities.map((uni) => {
               const getNumericRank = (rank: number | string) => {
                 if (typeof rank === 'number') return rank;
@@ -805,7 +845,7 @@ export default function App() {
                       {uni.name}
                     </h3>
                     <p className="text-xs flex items-center gap-1.5 mt-0.5 text-slate-500">
-                      <img src={`https://flagcdn.com/w40/${getCountryCode(uni.country)}.png`} alt={uni.country} className="w-4 h-auto rounded-[2px] shadow-sm" />
+                      <img src={`https://flagcdn.com/w40/${getCountryCode(uni.country)}.png`} alt={uni.country} loading="lazy" className="w-4 h-auto rounded-[2px] shadow-sm" />
                       <span>{uni.country}</span>
                     </p>
                     <div className="flex items-center gap-2 mt-1.5">
@@ -872,25 +912,18 @@ export default function App() {
           {/* Floating Toggle Button (Desktop & Mobile) */}
           <button
             onClick={() => setShowSidebar(!showSidebar)}
-            className={`absolute z-[1005] bg-white border border-slate-200 rounded-full shadow-[0_0_15px_rgba(0,0,0,0.1)] flex items-center justify-center hover:bg-slate-50 hover:scale-105 transition-all duration-300 group font-bold text-sm text-slate-700 px-4 py-2.5 gap-2 ${
+            className={`absolute z-[1005] bg-white border border-slate-200 rounded-full shadow-[0_0_15px_rgba(0,0,0,0.1)] flex items-center justify-center hover:bg-slate-50 hover:scale-105 transition-all duration-300 group w-12 h-12 ${
               selectedUni ? 'hidden md:flex' : 'flex'
             } ${
               showSidebar 
-                ? 'bottom-6 left-1/2 -translate-x-1/2 md:bottom-auto md:top-1/2 md:-translate-y-1/2 md:left-80 lg:left-96 md:-translate-x-1/2' 
-                : 'bottom-6 left-1/2 -translate-x-1/2 md:bottom-auto md:top-1/2 md:-translate-y-1/2 md:left-4 md:translate-x-0'
+                ? 'top-1/2 -translate-y-1/2 left-[calc(100%-4rem)] md:left-80 lg:left-96 md:-translate-x-1/2' 
+                : 'top-1/2 -translate-y-1/2 left-4 translate-x-0'
             }`}
           >
-            {showSidebar ? (
-              <>
-                <ChevronLeft className="w-4 h-4 text-blue-600" />
-                <span>Hide</span>
-              </>
-            ) : (
-              <>
-                <List className="w-4 h-4 text-blue-600" />
-                <span>List</span>
-              </>
-            )}
+            <div className="relative w-6 h-6">
+              <ChevronLeft className={`absolute inset-0 w-6 h-6 text-slate-500 group-hover:text-blue-600 transition-all duration-300 ${showSidebar ? 'opacity-100 rotate-0' : 'opacity-0 -rotate-180'}`} />
+              <List className={`absolute inset-0 w-6 h-6 text-slate-500 group-hover:text-blue-600 transition-all duration-300 ${!showSidebar ? 'opacity-100 rotate-0' : 'opacity-0 rotate-180'}`} />
+            </div>
           </button>
         </main>
 
@@ -908,19 +941,37 @@ export default function App() {
                   <X className="w-5 h-5" />
                 </button>
               </div>
-              <div id="details-scroll-container" className="flex-1 overflow-y-auto custom-scrollbar p-6 pb-28">
+              <div id="details-scroll-container" className="flex-1 overflow-y-auto custom-scrollbar p-6 pb-28 md:pb-6">
                 <DetailsImage uni={displayedUni} />
                 <div className="flex items-center justify-between gap-3 mb-6">
                   <div className="flex items-center gap-3">
-                    <img src={`https://flagcdn.com/w40/${getCountryCode(displayedUni.country)}.png`} alt={displayedUni.country} className="w-10 h-auto rounded-sm shadow-md" />
+                    <img src={`https://flagcdn.com/w40/${getCountryCode(displayedUni.country)}.png`} alt={displayedUni.country} loading="lazy" className="w-10 h-auto rounded-sm shadow-md" />
                     <h2 className="text-2xl font-bold leading-tight text-slate-900">{displayedUni.name}</h2>
                   </div>
-                  <button 
-                    onClick={(e) => toggleFavorite(e, displayedUni.europe_rank)}
-                    className="p-2 rounded-full hover:bg-slate-100 transition-colors shrink-0"
-                  >
-                    <Heart className={`w-6 h-6 ${favorites.includes(displayedUni.europe_rank) ? 'fill-red-500 text-red-500' : 'text-slate-400'}`} />
-                  </button>
+                  <div className="flex items-center gap-1">
+                    <button 
+                      onClick={handleShare}
+                      className="p-2 rounded-full hover:bg-slate-100 transition-colors shrink-0 relative group"
+                      title="Copy link to share"
+                    >
+                      {copiedLink ? (
+                        <Check className="w-6 h-6 text-green-500" />
+                      ) : (
+                        <Share2 className="w-6 h-6 text-slate-400 group-hover:text-blue-500" />
+                      )}
+                      {copiedLink && (
+                        <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-xs px-2 py-1 rounded shadow-lg whitespace-nowrap">
+                          Link copied!
+                        </span>
+                      )}
+                    </button>
+                    <button 
+                      onClick={(e) => toggleFavorite(e, displayedUni.europe_rank)}
+                      className="p-2 rounded-full hover:bg-slate-100 transition-colors shrink-0"
+                    >
+                      <Heart className={`w-6 h-6 ${favorites.includes(displayedUni.europe_rank) ? 'fill-red-500 text-red-500' : 'text-slate-400'}`} />
+                    </button>
+                  </div>
                 </div>
                 
                 <div className="space-y-6">

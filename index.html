@@ -15,21 +15,48 @@
     <meta property="og:url" content="https://findyouruni.eu/" />
     <meta property="og:title" content="University Finder - Discover Top Universities" />
     <meta property="og:description" content="Explore the best universities across Europe and the world. Compare rankings, discover top programs, and find your perfect study destination today!" />
-    <meta property="og:image" content="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=1200&h=630&fit=crop" />
+    <meta property="og:image" content="https://findyouruni.eu/og-image.png" />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:url" content="https://findyouruni.eu/" />
     <meta name="twitter:title" content="University Finder - Discover Top Universities" />
     <meta name="twitter:description" content="Explore the best universities across Europe and the world. Compare rankings, discover top programs, and find your perfect study destination today!" />
-    <meta name="twitter:image" content="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=1200&h=630&fit=crop" />
+    <meta name="twitter:image" content="https://findyouruni.eu/og-image.png" />
 
     <meta name="robots" content="index, follow">
 
     <title>FindYourUni.eu - Discover Top Universities in Europe</title>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <style>
+        .initial-loader {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+          width: 100vw;
+          background-color: #f8fafc;
+          font-family: system-ui, sans-serif;
+        }
+        .spinner {
+          width: 40px;
+          height: 40px;
+          border: 4px solid #bfdbfe;
+          border-top: 4px solid #3b82f6;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      </style>
+      <div class="initial-loader">
+        <div class="spinner"></div>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
