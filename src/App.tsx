@@ -42,7 +42,7 @@ const UniversityImage = ({ uni, rank, isHighRank, rankTextClass, className }: an
     }
   }, [uni.europe_rank]);
 
-  const photoUrl = cloudinaryUrls[uni.europe_rank as keyof typeof cloudinaryUrls]?.thumb;
+  const photoUrl = cloudinaryUrls[uni.europe_rank as keyof typeof cloudinaryUrls]?.thumb?.replace('w_200,h_150', 'w_80,h_80').replace('q_auto', 'q_auto:low');
 
   if (error || !photoUrl) {
     return (
