@@ -61,7 +61,6 @@ const UniversityImage = ({ uni, rank, isHighRank, rankTextClass, className }: an
         ref={imgRef}
         src={photoUrl}
         alt={uni.name}
-        loading="lazy"
         onLoad={() => setLoaded(true)}
         onError={() => setError(true)}
         className={`absolute inset-0 w-full h-full object-cover transition-all duration-300 group-hover:scale-110 ${loaded ? 'opacity-100' : 'opacity-0'}`}
@@ -104,7 +103,6 @@ const DetailsImage = ({ uni }: { uni: any }) => {
         src={thumbUrl}
         alt=""
         aria-hidden="true"
-        loading="lazy"
         className={`absolute inset-0 w-full h-full object-cover scale-110 blur-sm transition-opacity duration-500 ${fullLoaded ? 'opacity-0' : 'opacity-100'}`}
       />
       {/* Pełne zdjęcie - pojawia się po załadowaniu */}
@@ -113,7 +111,6 @@ const DetailsImage = ({ uni }: { uni: any }) => {
         key={uni.europe_rank}
         src={fullUrl}
         alt={uni.name}
-        loading="lazy"
         onLoad={() => setFullLoaded(true)}
         onError={() => setError(true)}
         className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${fullLoaded ? 'opacity-100' : 'opacity-0'}`}
@@ -487,7 +484,7 @@ export default function App() {
         const airportIcon = L.divIcon({
           className: 'custom-div-icon',
           html: `
-            <div class="flex items-center justify-center w-8 h-8 rounded-full shadow-lg bg-sky-500 border-2 border-white z-[1000]">
+            <div class="flex items-center justify-center w-8 h-8 rounded-full shadow-lg bg-fuchsia-600 border-2 border-white z-[1000]">
               <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.2-1.1.6L3 8l7 4-3 3-3.5-1.5L2 15l5 2 2 5 1.5-1.5-1.5-3.5 3-3 4 7c.4-.2.7-.6.6-1.1z"/></svg>
             </div>
           `,
@@ -505,7 +502,7 @@ export default function App() {
         const trainIcon = L.divIcon({
           className: 'custom-div-icon',
           html: `
-            <div class="flex items-center justify-center w-8 h-8 rounded-full shadow-lg bg-emerald-500 border-2 border-white z-[1000]">
+            <div class="flex items-center justify-center w-8 h-8 rounded-full shadow-lg bg-orange-500 border-2 border-white z-[1000]">
               <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="16" x="4" y="3" rx="2"/><path d="M4 11h16"/><path d="M12 3v8"/><path d="m8 19-2 3"/><path d="m18 22-2-3"/><path d="M8 15h0"/><path d="M16 15h0"/></svg>
             </div>
           `,
@@ -845,7 +842,7 @@ export default function App() {
                       {uni.name}
                     </h3>
                     <p className="text-xs flex items-center gap-1.5 mt-0.5 text-slate-500">
-                      <img src={`https://flagcdn.com/w40/${getCountryCode(uni.country)}.png`} alt={uni.country} loading="lazy" className="w-4 h-auto rounded-[2px] shadow-sm" />
+                      <img src={`https://flagcdn.com/w40/${getCountryCode(uni.country)}.png`} alt={uni.country} className="w-4 h-auto rounded-[2px] shadow-sm" />
                       <span>{uni.country}</span>
                     </p>
                     <div className="flex items-center gap-2 mt-1.5">
@@ -945,7 +942,7 @@ export default function App() {
                 <DetailsImage uni={displayedUni} />
                 <div className="flex items-center justify-between gap-3 mb-6">
                   <div className="flex items-center gap-3">
-                    <img src={`https://flagcdn.com/w40/${getCountryCode(displayedUni.country)}.png`} alt={displayedUni.country} loading="lazy" className="w-10 h-auto rounded-sm shadow-md" />
+                    <img src={`https://flagcdn.com/w40/${getCountryCode(displayedUni.country)}.png`} alt={displayedUni.country} className="w-10 h-auto rounded-sm shadow-md" />
                     <h2 className="text-2xl font-bold leading-tight text-slate-900">{displayedUni.name}</h2>
                   </div>
                   <div className="flex items-center gap-1">
