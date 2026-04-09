@@ -3,30 +3,65 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Preconnect to external domains -->
+    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
+    <link rel="preconnect" href="https://basemaps.cartocdn.com" crossorigin />
+    <link rel="preconnect" href="https://flagcdn.com" crossorigin />
+
+    <!-- Preload critical data -->
+    <link rel="preload" href="/data/universities.json" as="fetch" crossorigin />
+
+    <!-- Favicons -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" sizes="any" />
-    <link rel="shortcut icon" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/favicon.svg" />
+
+    <!-- PWA -->
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#2563eb" />
-    <meta name="description" content="Explore the best universities across Europe and the world with FindYourUni.eu. Compare rankings, discover top programs, and find your perfect study destination today!" />
-    
+
+    <!-- Primary SEO -->
+    <title>FindYourUni.eu — Top European Universities with English Programs</title>
+    <meta name="description" content="Discover and compare 300+ European universities offering English-language degree programmes. Explore rankings, find top programs, and plan your study destination." />
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
+    <link rel="canonical" href="https://www.findyouruni.eu/" />
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://findyouruni.eu/" />
-    <meta property="og:title" content="University Finder - Discover Top Universities" />
-    <meta property="og:description" content="Explore the best universities across Europe and the world. Compare rankings, discover top programs, and find your perfect study destination today!" />
-    <meta property="og:image" content="https://findyouruni.eu/og-image.png" />
+    <meta property="og:url" content="https://www.findyouruni.eu/" />
+    <meta property="og:title" content="FindYourUni.eu — Top European Universities with English Programs" />
+    <meta property="og:description" content="Compare 300+ European universities with English programmes. Open data, transparent methodology." />
+    <meta property="og:image" content="https://www.findyouruni.eu/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Map of top European universities" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:site_name" content="FindYourUni.eu" />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:url" content="https://findyouruni.eu/" />
-    <meta name="twitter:title" content="University Finder - Discover Top Universities" />
-    <meta name="twitter:description" content="Explore the best universities across Europe and the world. Compare rankings, discover top programs, and find your perfect study destination today!" />
-    <meta name="twitter:image" content="https://findyouruni.eu/og-image.png" />
+    <meta name="twitter:title" content="FindYourUni.eu — Top European Universities with English Programs" />
+    <meta name="twitter:description" content="Compare 300+ European universities with English programmes." />
+    <meta name="twitter:image" content="https://www.findyouruni.eu/og-image.png" />
 
-    <meta name="robots" content="index, follow">
-
-    <title>FindYourUni.eu - Discover Top Universities in Europe</title>
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "FindYourUni.eu",
+      "url": "https://www.findyouruni.eu",
+      "description": "European university ranking platform with English-language programmes",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://www.findyouruni.eu/?q={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
   </head>
   <body>
     <div id="root">
@@ -60,4 +95,3 @@
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
-

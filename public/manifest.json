@@ -1,17 +1,20 @@
 {
-  "name": "University Finder",
-  "short_name": "UniFinder",
-  "description": "Discover Top Universities in Europe",
+  "name": "FindYourUni.eu",
+  "short_name": "FindYourUni",
+  "description": "Discover and compare top European universities with English programmes",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#2563eb",
+  "orientation": "portrait-primary",
+  "categories": ["education", "reference"],
+  "lang": "en",
   "icons": [
     {
       "src": "/favicon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ]
 }

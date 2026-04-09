@@ -1,14 +1,12 @@
 import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import L from 'leaflet';
 import 'leaflet.markercluster';
-import { universities } from './data';
+import { universities, cloudinaryUrls } from './data';
 import { Trophy, Info, Search, X, List, Map as MapIcon, ChevronRight, ChevronLeft, Globe, LayoutGrid, ListFilter as Filter, GraduationCap, HelpCircle, Heart, Plane, Train, Bus, Car, Navigation, ExternalLink, Sparkles, Loader2, Share2, Check } from 'lucide-react';
 import { ContactModal } from './components/ContactModal';
 import { AboutPage } from './components/AboutPage';
-import { cloudinaryUrls } from './cloudinaryUrls';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
-import Markdown from 'react-markdown';
 
 interface TravelSegment {
   mode: string;
@@ -591,8 +589,9 @@ export default function App() {
     <>
       {currentPage === 'about' && <AboutPage onBack={() => setCurrentPage('home')} />}
       <div className={`relative h-[100dvh] w-screen flex flex-col bg-slate-50 ${currentPage === 'about' ? 'hidden' : ''}`}>
+      <a href="#map" className="skip-link">Skip to map</a>
       {/* Header */}
-      <header className="z-[1001] border-b px-4 md:px-6 py-3 md:py-4 shadow-sm flex flex-row items-center justify-between gap-2 md:gap-4 bg-white/90 border-slate-200 text-slate-900 backdrop-blur-md">
+      <header className="z-[1001] border-b px-4 md:px-6 py-3 md:py-4 shadow-sm flex flex-row items-center justify-between gap-2 md:gap-4 bg-white/90 border-slate-200 text-slate-900 backdrop-blur-md" role="banner">
         <div className={`flex items-center gap-2 md:gap-3 ${isMobileSearchOpen ? 'hidden md:flex' : 'flex'}`}>
           <div className="bg-blue-600 p-1.5 md:p-2 rounded-lg shadow-blue-200 shadow-lg shrink-0">
             <GraduationCap className="w-4 h-4 md:w-5 md:h-5 text-white" />
@@ -800,7 +799,7 @@ export default function App() {
 
       <div className="flex-1 flex overflow-hidden relative">
         {/* Sidebar List */}
-        <aside className={`z-[1000] absolute inset-y-0 left-0 w-full md:w-80 lg:w-96 transition-transform duration-300 transform bg-white border-r border-slate-200 flex flex-col shadow-2xl ${
+        <aside aria-label="University list" className={`z-[1000] absolute inset-y-0 left-0 w-full md:w-80 lg:w-96 transition-transform duration-300 transform bg-white border-r border-slate-200 flex flex-col shadow-2xl ${
           showSidebar ? 'translate-x-0' : '-translate-x-full'
         }`}>
           <div className="flex-1 overflow-y-auto custom-scrollbar">
@@ -884,7 +883,7 @@ export default function App() {
 
         {/* Map Container */}
         <main className="flex-1 relative">
-          <div ref={mapRef} className="absolute inset-0 z-0" id="map" />
+          <div ref={mapRef} className="absolute inset-0 z-0" id="map" role="application" aria-label="Interactive map of European universities" />
           
           {/* Legend */}
           <div className="hidden md:block absolute bottom-8 right-20 z-[1000] p-4 rounded-2xl shadow-xl border max-w-xs transition-all backdrop-blur-md bg-white/90 border-slate-200 text-slate-800">
