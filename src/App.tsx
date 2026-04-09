@@ -1,12 +1,14 @@
-import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useMemo, useCallback, lazy, Suspense } from 'react';
 import L from 'leaflet';
 import 'leaflet.markercluster';
 import { universities, cloudinaryUrls } from './data';
 import { Trophy, Info, Search, X, List, Map as MapIcon, ChevronRight, ChevronLeft, Globe, LayoutGrid, ListFilter as Filter, GraduationCap, HelpCircle, Heart, Plane, Train, Bus, Car, Navigation, ExternalLink, Sparkles, Loader2, Share2, Check } from 'lucide-react';
-import { ContactModal } from './components/ContactModal';
-import { AboutPage } from './components/AboutPage';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
+import { List as VirtualList } from 'react-window';
+
+const ContactModal = lazy(() => import('./components/ContactModal').then(m => ({ default: m.ContactModal })));
+const AboutPage = lazy(() => import('./components/AboutPage').then(m => ({ default: m.AboutPage })));
 
 interface TravelSegment {
   mode: string;
@@ -58,7 +60,8 @@ const UniversityImage = ({ uni, rank, isHighRank, rankTextClass, className }: an
       <img
         ref={imgRef}
         src={photoUrl}
-        alt={uni.name}
+        alt={`Campus of ${uni.name}`}
+        loading="lazy"
         onLoad={() => setLoaded(true)}
         onError={() => setError(true)}
         className={`absolute inset-0 w-full h-full object-cover transition-all duration-300 group-hover:scale-110 ${loaded ? 'opacity-100' : 'opacity-0'}`}
@@ -96,19 +99,17 @@ const DetailsImage = ({ uni }: { uni: any }) => {
 
   return (
     <div className="w-full h-48 rounded-xl shadow-md mb-6 overflow-hidden relative">
-      {/* Rozmyte zdjęcie niskiej jakości - widoczne od razu */}
       <img
         src={thumbUrl}
         alt=""
         aria-hidden="true"
         className={`absolute inset-0 w-full h-full object-cover scale-110 blur-sm transition-opacity duration-500 ${fullLoaded ? 'opacity-0' : 'opacity-100'}`}
       />
-      {/* Pełne zdjęcie - pojawia się po załadowaniu */}
       <img
         ref={imgRef}
         key={uni.europe_rank}
         src={fullUrl}
-        alt={uni.name}
+        alt={`Campus of ${uni.name}, ${uni.country}`}
         onLoad={() => setFullLoaded(true)}
         onError={() => setError(true)}
         className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${fullLoaded ? 'opacity-100' : 'opacity-0'}`}
@@ -168,6 +169,81 @@ export function getCountryCode(countryName: string): string {
   return mapping[countryName] || "eu";
 }
 
+const ITEM_HEIGHT = 88;
+
+interface UniversityRowData {
+  items: typeof universities;
+  rankingMode: 'europe' | 'world';
+  favorites: (number | string)[];
+  focusUniversity: (uni: typeof universities[0]) => void;
+  toggleFavorite: (e: React.MouseEvent, rank: number | string) => void;
+}
+
+const UniversityRow = (props: any): React.ReactElement => {
+  const { index, style, items, rankingMode, favorites, focusUniversity, toggleFavorite } = props;
+  const uni = items[index];
+
+  const getNumericRank = (rank: number | string) => {
+    if (typeof rank === 'number') return rank;
+    const match = rank.match(/\d+/);
+    return match ? parseInt(match[0], 10) : 9999;
+  };
+
+  const rank = rankingMode === 'europe' ? uni.europe_rank : uni.world_rank;
+  const isHighRank = rankingMode === 'europe' ? getNumericRank(uni.europe_rank) <= 10 : getNumericRank(uni.world_rank) <= 50;
+  const isTwoPartWorldRank = rankingMode === 'world' && typeof uni.world_rank === 'string' && uni.world_rank.includes('-');
+  const rankTextClass = isTwoPartWorldRank ? 'text-[10px] tracking-tighter leading-none text-center px-0.5' : 'text-xs';
+
+  return (
+    <div
+      style={style}
+      onClick={() => focusUniversity(uni)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          focusUniversity(uni);
+        }
+      }}
+      className="w-full text-left px-4 border-b transition-all group flex items-center gap-4 border-slate-50 hover:bg-blue-50/50 cursor-pointer"
+    >
+      <UniversityImage
+        uni={uni}
+        rank={rank}
+        isHighRank={isHighRank}
+        rankTextClass={rankTextClass}
+        className=""
+      />
+      <div className="flex-1 min-w-0">
+        <h3 className="font-bold text-sm truncate text-slate-900">
+          {uni.name}
+        </h3>
+        <p className="text-xs flex items-center gap-1.5 mt-0.5 text-slate-500">
+          <img src={`https://flagcdn.com/w40/${getCountryCode(uni.country)}.png`} alt={`Flag of ${uni.country}`} className="w-4 h-auto rounded-[2px] shadow-sm" loading="lazy" />
+          <span>{uni.country}</span>
+        </p>
+        <div className="flex items-center gap-2 mt-1.5">
+          <span className="text-[10px] font-bold bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">
+            World: #{uni.world_rank}
+          </span>
+          <span className="text-[10px] font-bold bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded">
+            Europe: #{uni.europe_rank}
+          </span>
+        </div>
+      </div>
+      <button
+        onClick={(e) => toggleFavorite(e, uni.europe_rank)}
+        className="p-2 -mr-2 text-slate-300 hover:text-red-500 transition-colors"
+        aria-label={favorites.includes(uni.europe_rank) ? 'Remove from favorites' : 'Add to favorites'}
+      >
+        <Heart className={`w-4 h-4 ${favorites.includes(uni.europe_rank) ? 'fill-red-500 text-red-500' : ''}`} />
+      </button>
+      <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0 text-slate-300" />
+    </div>
+  );
+};
+
 export default function App() {
   const mapRef = useRef<HTMLDivElement>(null);
   const leafletMap = useRef<L.Map | null>(null);
@@ -175,7 +251,9 @@ export default function App() {
   const transportMarkersRef = useRef<L.LayerGroup | null>(null);
   const markersRef = useRef<Map<number | string, L.Marker>>(new Map());
   const searchInputRef = useRef<HTMLInputElement>(null);
-  
+  const sidebarRef = useRef<HTMLDivElement>(null);
+  const [sidebarHeight, setSidebarHeight] = useState(600);
+
   const [showFlightWidget, setShowFlightWidget] = useState(false);
   const [flightOrigin, setFlightOrigin] = useState('');
   const [isEstimating, setIsEstimating] = useState(false);
@@ -222,7 +300,19 @@ export default function App() {
       delete (window as any).openFlightsModal;
     };
   }, []);
-  
+
+  // Measure sidebar height for react-window
+  useEffect(() => {
+    if (!sidebarRef.current) return;
+    const ro = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setSidebarHeight(entry.contentRect.height);
+      }
+    });
+    ro.observe(sidebarRef.current);
+    return () => ro.disconnect();
+  }, []);
+
   const [searchQuery, setSearchQuery] = useState('');
   const [showSidebar, setShowSidebar] = useState(false);
   const [currentPage, setCurrentPage] = useState<'home' | 'about'>('home');
@@ -234,7 +324,6 @@ export default function App() {
 
   const handleShare = () => {
     if (displayedUni) {
-      // W przyszłości można tu dodać parametr w URL np. ?uni=id
       navigator.clipboard.writeText(window.location.href);
       setCopiedLink(true);
       setTimeout(() => setCopiedLink(false), 2000);
@@ -252,7 +341,7 @@ export default function App() {
       }, 10);
     }
   }, [selectedUni]);
-  
+
   const [selectedCountry, setSelectedCountry] = useState<string>('');
   const [selectedSpecialization, setSelectedSpecialization] = useState<string>('');
   const [tempCountry, setTempCountry] = useState<string>('');
@@ -261,7 +350,7 @@ export default function App() {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [preselectedUni, setPreselectedUni] = useState<string>('');
   const [showHelpPrompt, setShowHelpPrompt] = useState(false);
-  
+
   const [favorites, setFavorites] = useState<(number | string)[]>(() => {
     const saved = localStorage.getItem('favorites');
     return saved ? JSON.parse(saved) : [];
@@ -272,12 +361,12 @@ export default function App() {
     localStorage.setItem('favorites', JSON.stringify(favorites));
   }, [favorites]);
 
-  const toggleFavorite = (e: React.MouseEvent, rank: number | string) => {
+  const toggleFavorite = useCallback((e: React.MouseEvent, rank: number | string) => {
     e.stopPropagation();
-    setFavorites(prev => 
+    setFavorites(prev =>
       prev.includes(rank) ? prev.filter(r => r !== rank) : [...prev, rank]
     );
-  };
+  }, []);
 
   useEffect(() => {
     const hasSeenPrompt = localStorage.getItem('hasSeenHelpPrompt');
@@ -286,7 +375,7 @@ export default function App() {
         if (currentPage === 'home') {
           setShowHelpPrompt(true);
         }
-      }, 30000); // 30 seconds
+      }, 30000);
       return () => clearTimeout(timer);
     }
   }, [currentPage]);
@@ -300,7 +389,7 @@ export default function App() {
     e.preventDefault();
     if (!flightOrigin.trim() || !displayedUni) return;
     localStorage.setItem('homeLocation', flightOrigin.trim());
-    
+
     setIsEstimating(true);
     setTravelEstimate(null);
     setTravelEstimateError(null);
@@ -355,7 +444,7 @@ export default function App() {
   const filteredUniversities = useMemo(() => {
     const query = searchQuery.toLowerCase().trim();
     let list = universities;
-    
+
     if (query) {
       list = list.filter(
         (uni) =>
@@ -363,19 +452,19 @@ export default function App() {
           uni.country.toLowerCase().includes(query)
       );
     }
-    
+
     if (selectedCountry) {
       list = list.filter(uni => uni.country === selectedCountry);
     }
-    
+
     if (selectedSpecialization) {
       list = list.filter(uni => uni.specializations?.includes(selectedSpecialization));
     }
-    
+
     if (showFavoritesOnly) {
       list = list.filter(uni => favorites.includes(uni.europe_rank));
     }
-    
+
     return list.sort((a, b) => {
       const getNumericRank = (rank: number | string) => {
         if (typeof rank === 'number') return rank;
@@ -387,15 +476,22 @@ export default function App() {
     });
   }, [searchQuery, rankingMode, selectedCountry, selectedSpecialization, showFavoritesOnly, favorites]);
 
+  // Leaflet map init — reads DOM dimensions before any writes, cleanup on unmount
   useEffect(() => {
     if (!mapRef.current || leafletMap.current) return;
 
+    const el = mapRef.current;
+
     const initMap = () => {
-      if (!mapRef.current || leafletMap.current) return;
-      
+      if (!el || leafletMap.current) return;
+
+      // Batch DOM read before Leaflet writes
+      const rect = el.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) return;
+
       const bounds = L.latLngBounds([34, -25], [72, 45]);
-      
-      leafletMap.current = L.map(mapRef.current, {
+
+      leafletMap.current = L.map(el, {
         center: [46.8182, 8.2275],
         zoom: window.innerWidth < 768 ? 3 : 5,
         minZoom: 2,
@@ -406,9 +502,16 @@ export default function App() {
         zoomControl: false,
       });
 
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      const retinaFlag = L.Browser.retina;
+      const tileSize = retinaFlag ? 512 : 256;
+      const zoomOffset = retinaFlag ? -1 : 0;
+      const tileSuffix = retinaFlag ? '@2x.png' : '.png';
+
+      L.tileLayer(`https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}${tileSuffix}`, {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
         maxZoom: 19,
+        tileSize,
+        zoomOffset,
       }).addTo(leafletMap.current);
 
       // @ts-ignore
@@ -418,7 +521,7 @@ export default function App() {
         spiderfyOnMaxZoom: true,
         chunkedLoading: true,
         maxClusterRadius: 40,
-        iconCreateFunction: function (cluster) {
+        iconCreateFunction: function (cluster: any) {
           const childCount = cluster.getChildCount();
           let c = ' marker-cluster-';
           if (childCount < 10) {
@@ -439,15 +542,17 @@ export default function App() {
       transportMarkersRef.current = L.layerGroup().addTo(leafletMap.current);
 
       L.control.zoom({ position: 'bottomright' }).addTo(leafletMap.current);
-      
+
       setMapInitialized(true);
     };
 
-    // Defer initialization to avoid layout thrashing (forced reflow) during initial render
-    const timerId = setTimeout(initMap, 50);
+    // Use requestAnimationFrame to avoid forced reflow during initial render
+    const rafId = requestAnimationFrame(() => {
+      initMap();
+    });
 
     return () => {
-      clearTimeout(timerId);
+      cancelAnimationFrame(rafId);
       if (leafletMap.current) {
         leafletMap.current.remove();
         leafletMap.current = null;
@@ -458,13 +563,13 @@ export default function App() {
   const focusUniversity = useCallback((uni: typeof universities[0]) => {
     setSelectedUni(uni);
     if (!leafletMap.current || !clusterGroupRef.current) return;
-    
+
     const marker = markersRef.current.get(uni.europe_rank);
     if (marker) {
       // @ts-ignore
       clusterGroupRef.current.zoomToShowLayer(marker);
     }
-    
+
     if (window.innerWidth < 768) {
       setShowSidebar(false);
     }
@@ -515,7 +620,6 @@ export default function App() {
       }
 
       if (selectedUni.nearest_airport || selectedUni.nearest_train_station) {
-        // Use a small timeout to allow zoomToShowLayer to finish its animation
         setTimeout(() => {
           if (leafletMap.current) {
             leafletMap.current.fitBounds(bounds, { padding: [50, 50], maxZoom: 13 });
@@ -538,11 +642,7 @@ export default function App() {
         return match ? parseInt(match[0], 10) : 9999;
       };
       const isTop10 = rankingMode === 'europe' ? getNumericRank(uni.europe_rank) <= 10 : getNumericRank(uni.world_rank) <= 50;
-      const rankToShow = rankingMode === 'europe' ? uni.europe_rank : uni.world_rank;
-      
-      const isTwoPartWorldRank = rankingMode === 'world' && typeof uni.world_rank === 'string' && uni.world_rank.includes('-');
-      const rankTextClass = isTwoPartWorldRank ? 'text-[8px] tracking-tighter leading-none text-center px-0.5' : 'text-[9px]';
-      
+
       const icon = L.divIcon({
         className: 'custom-div-icon',
         html: `
@@ -585,9 +685,21 @@ export default function App() {
     }
   }, [filteredUniversities, rankingMode, mapInitialized]);
 
+  const listRowProps = useMemo(() => ({
+    items: filteredUniversities,
+    rankingMode,
+    favorites,
+    focusUniversity,
+    toggleFavorite,
+  }), [filteredUniversities, rankingMode, favorites, focusUniversity, toggleFavorite]);
+
   return (
     <>
-      {currentPage === 'about' && <AboutPage onBack={() => setCurrentPage('home')} />}
+      {currentPage === 'about' && (
+        <Suspense fallback={<div className="h-screen w-screen flex items-center justify-center bg-slate-50"><div className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" /></div>}>
+          <AboutPage onBack={() => setCurrentPage('home')} />
+        </Suspense>
+      )}
       <div className={`relative h-[100dvh] w-screen flex flex-col bg-slate-50 ${currentPage === 'about' ? 'hidden' : ''}`}>
       <a href="#map" className="skip-link">Skip to map</a>
       {/* Header */}
@@ -604,42 +716,12 @@ export default function App() {
         </div>
 
         <div className={`flex items-center gap-2 ${isMobileSearchOpen ? 'w-full md:w-auto' : 'w-auto'} justify-end`}>
-          {/* Ranking Mode Toggle - temporarily disabled
-          <div className={`items-center gap-2 ${isMobileSearchOpen ? 'hidden md:flex' : 'flex'}`}>
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider hidden md:block">Ranking type:</span>
-            <div className="flex p-1 rounded-xl border transition-all bg-slate-100 border-slate-200">
-              <button
-              onClick={() => setRankingMode('europe')}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                rankingMode === 'europe' 
-                  ? 'bg-blue-600 text-white shadow-md' 
-                  : 'text-slate-500 hover:text-slate-700'
-              }`}
-            >
-              <LayoutGrid className="w-3.5 h-3.5" />
-              Europe
-            </button>
-            <button
-              onClick={() => setRankingMode('world')}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                rankingMode === 'world' 
-                  ? 'bg-blue-600 text-white shadow-md' 
-                  : 'text-slate-500 hover:text-slate-700'
-              }`}
-            >
-              <Globe className="w-3.5 h-3.5" />
-              World
-            </button>
-          </div>
-          </div>
-          */}
-
           <div className={`flex items-center gap-2 ${isMobileSearchOpen ? 'w-full' : ''}`}>
             {!isMobileSearchOpen && (
               <button
                 onClick={() => setCurrentPage('about')}
                 className="hidden md:flex items-center gap-1.5 px-3 py-1.5 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow-sm relative"
-                title="About"
+                aria-label="About this site"
               >
                 <Info className="w-4 h-4" />
                 About
@@ -651,25 +733,27 @@ export default function App() {
             <div className={`relative ${isMobileSearchOpen ? 'flex-1' : 'md:flex-1 md:w-64'}`}>
               {!isMobileSearchOpen && (
                 <div className="md:hidden flex items-center gap-2">
-                  <button 
+                  <button
                     onClick={() => setCurrentPage('about')}
                     className="p-2 rounded-xl transition-all bg-blue-600 text-white hover:bg-blue-700 flex items-center justify-center w-[36px] h-[36px] shadow-sm relative"
+                    aria-label="About this site"
                   >
                     <Info className="w-4 h-4" />
                     {showHelpPrompt && (
                       <span className="absolute -top-1 -right-1 w-3 h-3 bg-[#ff0000] border-2 border-white rounded-full animate-pulse shadow-[0_0_8px_rgba(255,0,0,0.8)]"></span>
                     )}
                   </button>
-                  <button 
+                  <button
                     onClick={() => setIsMobileSearchOpen(true)}
                     className="p-2 rounded-xl border transition-all bg-slate-100 border-slate-200 text-slate-600 flex items-center justify-center w-[36px] h-[36px]"
+                    aria-label="Open search"
                   >
                     <Search className="w-4 h-4" />
                   </button>
                 </div>
               )}
               <div className={`${isMobileSearchOpen ? 'block' : 'hidden md:block'} relative w-full`}>
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" aria-hidden="true" />
                 <input
                   ref={searchInputRef}
                   type="text"
@@ -677,18 +761,21 @@ export default function App() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-9 pr-9 py-2 rounded-xl text-sm border transition-all outline-none focus:ring-2 focus:ring-blue-500 bg-slate-100 border-slate-200 text-slate-900 placeholder:text-slate-400"
+                  aria-label="Search universities by name or country"
                 />
                 {searchQuery ? (
-                  <button 
+                  <button
                     onClick={() => setSearchQuery('')}
                     className="absolute right-3 top-1/2 -translate-y-1/2"
+                    aria-label="Clear search"
                   >
                     <X className="w-4 h-4 text-slate-400" />
                   </button>
                 ) : isMobileSearchOpen ? (
-                  <button 
+                  <button
                     onClick={() => setIsMobileSearchOpen(false)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 md:hidden"
+                    aria-label="Close search"
                   >
                     <X className="w-4 h-4 text-slate-400" />
                   </button>
@@ -697,54 +784,55 @@ export default function App() {
             </div>
 
             <div className={`relative ${isMobileSearchOpen ? 'hidden' : 'block'}`}>
-              <button 
+              <button
                 onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
                 className={`p-2 rounded-xl border transition-all flex items-center justify-center w-[36px] h-[36px] ${
-                  showFavoritesOnly 
-                    ? 'bg-red-50 border-red-200 text-red-500' 
+                  showFavoritesOnly
+                    ? 'bg-red-50 border-red-200 text-red-500'
                     : 'bg-slate-100 border-slate-200 text-slate-600'
                 }`}
-                title="Show Favorites"
+                aria-label={showFavoritesOnly ? 'Show all universities' : 'Show favorites only'}
               >
                 <Heart className={`w-4 h-4 ${showFavoritesOnly ? 'fill-current' : ''}`} />
               </button>
             </div>
 
             <div className={`relative ${isMobileSearchOpen ? 'hidden' : 'block'}`}>
-              <button 
+              <button
                 onClick={() => {
                   setTempCountry(selectedCountry);
                   setTempSpecialization(selectedSpecialization);
                   setIsFilterOpen(!isFilterOpen);
                 }}
                 className={`p-2 rounded-xl border transition-all flex items-center justify-center w-[36px] h-[36px] ${
-                  selectedCountry || selectedSpecialization 
-                    ? 'bg-blue-50 border-blue-200 text-blue-600' 
+                  selectedCountry || selectedSpecialization
+                    ? 'bg-blue-50 border-blue-200 text-blue-600'
                     : 'bg-slate-100 border-slate-200 text-slate-600'
                 }`}
+                aria-label="Open filters"
               >
                 <Filter className="w-4 h-4" />
                 {(selectedCountry || selectedSpecialization) && (
                   <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-blue-500 rounded-full border-2 border-white"></span>
                 )}
               </button>
-              
+
               {isFilterOpen && (
                 <>
-                  <div 
-                    className="fixed inset-0 z-[1999]" 
+                  <div
+                    className="fixed inset-0 z-[1999]"
                     onClick={() => setIsFilterOpen(false)}
                   ></div>
-                  <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-xl shadow-xl border border-slate-200 p-4 z-[2000]">
+                  <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-xl shadow-xl border border-slate-200 p-4 z-[2000]" role="dialog" aria-label="Filter universities">
                     <div className="flex justify-between items-center mb-4">
                       <h3 className="font-bold text-sm text-slate-800">Filters</h3>
                       {(tempCountry || tempSpecialization || selectedCountry || selectedSpecialization) && (
-                        <button 
-                          onClick={() => { 
-                            setTempCountry(''); 
-                            setTempSpecialization(''); 
-                            setSelectedCountry(''); 
-                            setSelectedSpecialization(''); 
+                        <button
+                          onClick={() => {
+                            setTempCountry('');
+                            setTempSpecialization('');
+                            setSelectedCountry('');
+                            setSelectedSpecialization('');
                           }}
                           className="text-xs text-blue-600 hover:text-blue-700 font-medium"
                         >
@@ -752,12 +840,12 @@ export default function App() {
                         </button>
                       )}
                     </div>
-                    
+
                     <div className="space-y-4">
                       <div>
                         <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Country</label>
-                        <select 
-                          value={tempCountry} 
+                        <select
+                          value={tempCountry}
                           onChange={(e) => setTempCountry(e.target.value)}
                           className="w-full text-sm p-2 rounded-lg border border-slate-200 bg-slate-50 outline-none focus:ring-2 focus:ring-blue-500 text-slate-700"
                         >
@@ -765,11 +853,11 @@ export default function App() {
                           {allCountries.map(c => <option key={c} value={c}>{c}</option>)}
                         </select>
                       </div>
-                      
+
                       <div>
                         <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Specialization</label>
-                        <select 
-                          value={tempSpecialization} 
+                        <select
+                          value={tempSpecialization}
                           onChange={(e) => setTempSpecialization(e.target.value)}
                           className="w-full text-sm p-2 rounded-lg border border-slate-200 bg-slate-50 outline-none focus:ring-2 focus:ring-blue-500 text-slate-700"
                         >
@@ -798,74 +886,23 @@ export default function App() {
       </header>
 
       <div className="flex-1 flex overflow-hidden relative">
-        {/* Sidebar List */}
+        {/* Sidebar List — virtualized with react-window */}
         <aside aria-label="University list" className={`z-[1000] absolute inset-y-0 left-0 w-full md:w-80 lg:w-96 transition-transform duration-300 transform bg-white border-r border-slate-200 flex flex-col shadow-2xl ${
           showSidebar ? 'translate-x-0' : '-translate-x-full'
         }`}>
-          <div className="flex-1 overflow-y-auto custom-scrollbar">
-            {filteredUniversities.map((uni) => {
-              const getNumericRank = (rank: number | string) => {
-                if (typeof rank === 'number') return rank;
-                const match = rank.match(/\d+/);
-                return match ? parseInt(match[0], 10) : 9999;
-              };
-              const rank = rankingMode === 'europe' ? uni.europe_rank : uni.world_rank;
-              const isHighRank = rankingMode === 'europe' ? getNumericRank(uni.europe_rank) <= 10 : getNumericRank(uni.world_rank) <= 50;
-              
-              const isTwoPartWorldRank = rankingMode === 'world' && typeof uni.world_rank === 'string' && uni.world_rank.includes('-');
-              const rankTextClass = isTwoPartWorldRank ? 'text-[10px] tracking-tighter leading-none text-center px-0.5' : 'text-xs';
-              
-              return (
-                <div
-                  key={uni.europe_rank}
-                  onClick={() => focusUniversity(uni)}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      focusUniversity(uni);
-                    }
-                  }}
-                  className="w-full text-left p-4 border-b transition-all group flex items-center gap-4 border-slate-50 hover:bg-blue-50/50 cursor-pointer"
-                >
-                  <UniversityImage 
-                    uni={uni} 
-                    rank={rank} 
-                    isHighRank={isHighRank} 
-                    rankTextClass={rankTextClass} 
-                    className=""
-                  />
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-bold text-sm truncate text-slate-900">
-                      {uni.name}
-                    </h3>
-                    <p className="text-xs flex items-center gap-1.5 mt-0.5 text-slate-500">
-                      <img src={`https://flagcdn.com/w40/${getCountryCode(uni.country)}.png`} alt={uni.country} className="w-4 h-auto rounded-[2px] shadow-sm" />
-                      <span>{uni.country}</span>
-                    </p>
-                    <div className="flex items-center gap-2 mt-1.5">
-                      <span className="text-[10px] font-bold bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">
-                        World: #{uni.world_rank}
-                      </span>
-                      <span className="text-[10px] font-bold bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded">
-                        Europe: #{uni.europe_rank}
-                      </span>
-                    </div>
-                  </div>
-                  <button 
-                    onClick={(e) => toggleFavorite(e, uni.europe_rank)}
-                    className="p-2 -mr-2 text-slate-300 hover:text-red-500 transition-colors"
-                  >
-                    <Heart className={`w-4 h-4 ${favorites.includes(uni.europe_rank) ? 'fill-red-500 text-red-500' : ''}`} />
-                  </button>
-                  <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0 text-slate-300" />
-                </div>
-              );
-            })}
-            {filteredUniversities.length === 0 && (
+          <div ref={sidebarRef} className="flex-1 overflow-hidden">
+            {filteredUniversities.length > 0 ? (
+              <VirtualList<UniversityRowData>
+                defaultHeight={sidebarHeight}
+                rowCount={filteredUniversities.length}
+                rowHeight={ITEM_HEIGHT}
+                overscanCount={3}
+                rowProps={listRowProps}
+                rowComponent={UniversityRow as any}
+              />
+            ) : (
               <div className="p-12 text-center">
-                <Search className="w-8 h-8 text-slate-300 mx-auto mb-3" />
+                <Search className="w-8 h-8 text-slate-300 mx-auto mb-3" aria-hidden="true" />
                 <p className="text-sm text-slate-400">No results found for your search.</p>
               </div>
             )}
@@ -883,12 +920,12 @@ export default function App() {
 
         {/* Map Container */}
         <main className="flex-1 relative">
-          <div ref={mapRef} className="absolute inset-0 z-0" id="map" role="application" aria-label="Interactive map of European universities" />
-          
+          <div ref={mapRef} className="absolute inset-0 z-0 map-skeleton" id="map" role="application" aria-label="Interactive map of European universities" />
+
           {/* Legend */}
           <div className="hidden md:block absolute bottom-8 right-20 z-[1000] p-4 rounded-2xl shadow-xl border max-w-xs transition-all backdrop-blur-md bg-white/90 border-slate-200 text-slate-800">
             <div className="flex items-center gap-2 mb-3">
-              <Info className="w-4 h-4 text-blue-600" />
+              <Info className="w-4 h-4 text-blue-600" aria-hidden="true" />
               <h2 className="text-sm font-bold uppercase tracking-tight">Map Legend</h2>
             </div>
             <div className="space-y-3">
@@ -905,14 +942,15 @@ export default function App() {
             </div>
           </div>
 
-          {/* Floating Toggle Button (Desktop & Mobile) */}
+          {/* Floating Toggle Button */}
           <button
             onClick={() => setShowSidebar(!showSidebar)}
+            aria-label={showSidebar ? 'Hide university list' : 'Show university list'}
             className={`absolute z-[1005] bg-white border border-slate-200 rounded-full shadow-[0_0_15px_rgba(0,0,0,0.1)] flex items-center justify-center hover:bg-slate-50 hover:scale-105 transition-all duration-300 group w-12 h-12 ${
               selectedUni ? 'hidden md:flex' : 'flex'
             } ${
-              showSidebar 
-                ? 'top-1/2 -translate-y-1/2 left-[calc(100%-4rem)] md:left-80 lg:left-96 md:-translate-x-1/2' 
+              showSidebar
+                ? 'top-1/2 -translate-y-1/2 left-[calc(100%-4rem)] md:left-80 lg:left-96 md:-translate-x-1/2'
                 : 'top-1/2 -translate-y-1/2 left-4 translate-x-0'
             }`}
           >
@@ -924,7 +962,7 @@ export default function App() {
         </main>
 
         {/* Right Sidebar - Details */}
-        <aside className={`z-[1000] absolute inset-y-0 right-0 w-full md:w-80 lg:w-96 transition-transform duration-300 transform bg-white border-l border-slate-200 flex flex-col shadow-2xl ${
+        <aside aria-label="University details" className={`z-[1000] absolute inset-y-0 right-0 w-full md:w-80 lg:w-96 transition-transform duration-300 transform bg-white border-l border-slate-200 flex flex-col shadow-2xl ${
           selectedUni ? 'translate-x-0' : 'translate-x-full'
         }`}>
           {displayedUni && (
@@ -933,7 +971,7 @@ export default function App() {
                 <h2 className="font-bold text-sm uppercase tracking-wider text-slate-500">
                   University Details
                 </h2>
-                <button onClick={() => setSelectedUni(null)} className="p-1 text-slate-400 hover:text-slate-600 transition-colors">
+                <button onClick={() => setSelectedUni(null)} className="p-1 text-slate-400 hover:text-slate-600 transition-colors" aria-label="Close details panel">
                   <X className="w-5 h-5" />
                 </button>
               </div>
@@ -941,14 +979,14 @@ export default function App() {
                 <DetailsImage uni={displayedUni} />
                 <div className="flex items-center justify-between gap-3 mb-6">
                   <div className="flex items-center gap-3">
-                    <img src={`https://flagcdn.com/w40/${getCountryCode(displayedUni.country)}.png`} alt={displayedUni.country} className="w-10 h-auto rounded-sm shadow-md" />
+                    <img src={`https://flagcdn.com/w40/${getCountryCode(displayedUni.country)}.png`} alt={`Flag of ${displayedUni.country}`} className="w-10 h-auto rounded-sm shadow-md" />
                     <h2 className="text-2xl font-bold leading-tight text-slate-900">{displayedUni.name}</h2>
                   </div>
                   <div className="flex items-center gap-1">
-                    <button 
+                    <button
                       onClick={handleShare}
                       className="p-2 rounded-full hover:bg-slate-100 transition-colors shrink-0 relative group"
-                      title="Copy link to share"
+                      aria-label="Copy link to share"
                     >
                       {copiedLink ? (
                         <Check className="w-6 h-6 text-green-500" />
@@ -961,15 +999,16 @@ export default function App() {
                         </span>
                       )}
                     </button>
-                    <button 
+                    <button
                       onClick={(e) => toggleFavorite(e, displayedUni.europe_rank)}
                       className="p-2 rounded-full hover:bg-slate-100 transition-colors shrink-0"
+                      aria-label={favorites.includes(displayedUni.europe_rank) ? 'Remove from favorites' : 'Add to favorites'}
                     >
                       <Heart className={`w-6 h-6 ${favorites.includes(displayedUni.europe_rank) ? 'fill-red-500 text-red-500' : 'text-slate-400'}`} />
                     </button>
                   </div>
                 </div>
-                
+
                 <div className="space-y-6">
                   <div>
                     <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Location</h3>
@@ -990,13 +1029,13 @@ export default function App() {
                   {displayedUni.website && (
                     <div>
                       <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Website</h3>
-                      <a 
-                        href={displayedUni.website} 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
+                      <a
+                        href={displayedUni.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium transition-colors"
                       >
-                        <Globe className="w-4 h-4" />
+                        <Globe className="w-4 h-4" aria-hidden="true" />
                         {displayedUni.website.replace(/^https?:\/\//, '')}
                       </a>
                     </div>
@@ -1006,7 +1045,7 @@ export default function App() {
                     <div>
                       <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Top Specializations</h3>
                       <div className="flex flex-wrap gap-2">
-                        {displayedUni.specializations.map((spec, idx) => (
+                        {displayedUni.specializations.map((spec: string, idx: number) => (
                           <span key={idx} className="bg-slate-100 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-200">
                             {spec}
                           </span>
@@ -1022,7 +1061,7 @@ export default function App() {
                         {displayedUni.nearest_airport && (
                           <div className="flex items-start gap-3">
                             <div className="p-2 bg-sky-50 text-sky-600 rounded-lg shrink-0">
-                              <Plane className="w-4 h-4" />
+                              <Plane className="w-4 h-4" aria-hidden="true" />
                             </div>
                             <div>
                               <p className="text-sm font-bold text-slate-800">
@@ -1037,7 +1076,7 @@ export default function App() {
                         {displayedUni.nearest_train_station && (
                           <div className="flex items-start gap-3">
                             <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg shrink-0">
-                              <Train className="w-4 h-4" />
+                              <Train className="w-4 h-4" aria-hidden="true" />
                             </div>
                             <div>
                               <p className="text-sm font-bold text-slate-800">
@@ -1050,22 +1089,23 @@ export default function App() {
                           </div>
                         )}
                       </div>
-                      
+
                       <div className="mt-4 p-3 bg-purple-50/30 rounded-xl border border-purple-100">
-                        <button 
+                        <button
                           onClick={() => {
                             setShowFlightWidget(!showFlightWidget);
                           }}
                           className="w-full flex items-center justify-center gap-2 text-sm font-bold text-purple-700 hover:text-purple-800 transition-colors bg-purple-100/50 hover:bg-purple-100 px-3 py-2 rounded-lg"
+                          aria-label="Estimate travel cost"
                         >
-                          <Sparkles className="w-4 h-4" />
+                          <Sparkles className="w-4 h-4" aria-hidden="true" />
                           Estimate Travel Cost
                         </button>
-                        
+
                         {showFlightWidget && (
                           <div className="mt-3 animate-in fade-in slide-in-from-top-2 duration-200">
-                            <form 
-                              onSubmit={handleEstimateTravel} 
+                            <form
+                              onSubmit={handleEstimateTravel}
                               className="mb-3"
                             >
                               <label className="block text-[10px] font-bold text-purple-800 uppercase tracking-wider mb-1.5">Where are you traveling from?</label>
@@ -1077,31 +1117,31 @@ export default function App() {
                                   placeholder="e.g. Warsaw or WAW"
                                   className="flex-1 text-xs px-2.5 py-1.5 bg-white border border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
                                   required
+                                  aria-label="Origin city or airport code"
                                 />
-                                <button 
-                                  type="submit" 
+                                <button
+                                  type="submit"
                                   disabled={isEstimating}
                                   className="bg-purple-600 hover:bg-purple-700 disabled:bg-purple-400 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-colors shadow-sm flex items-center justify-center min-w-[70px]"
                                 >
-                                  {isEstimating ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Calculate'}
+                                  {isEstimating ? <Loader2 className="w-4 h-4 animate-spin" aria-label="Calculating" /> : 'Calculate'}
                                 </button>
                               </div>
                             </form>
-                            
+
                             {travelEstimateError && (
-                              <div className="mt-3 text-xs text-red-500 font-medium">
+                              <div className="mt-3 text-xs text-red-500 font-medium" role="alert">
                                 {travelEstimateError}
                               </div>
                             )}
-                            
+
                             {travelEstimate && (
                               <div className="mt-4 pt-4 border-t border-purple-200/50" ref={resultsRef}>
                                 <h4 className="text-[10px] font-bold text-purple-800 mb-4 uppercase tracking-wider">Fastest Route</h4>
-                                
+
                                 <div className="relative flex flex-col w-full pl-2 pb-2">
                                   {travelEstimate.stops.map((stop, index) => (
                                     <React.Fragment key={index}>
-                                      {/* Stop Node */}
                                       <div className="flex items-center relative z-10">
                                         <div className="w-3 h-3 rounded-full bg-purple-600 border-2 border-white shadow-sm shrink-0"></div>
                                         <span className="ml-3 text-[11px] font-bold text-slate-700" title={stop}>
@@ -1109,7 +1149,6 @@ export default function App() {
                                         </span>
                                       </div>
 
-                                      {/* Segment Line */}
                                       {index < travelEstimate.stops.length - 1 && (
                                         <div className="flex items-center relative min-h-[40px] ml-1.5 border-l-2 border-purple-200 pl-6 py-2">
                                           <div className="absolute -left-[11px] bg-white p-1 rounded-full border border-purple-200 text-purple-600 shadow-sm">
@@ -1120,7 +1159,7 @@ export default function App() {
                                               <span className="font-bold text-slate-700">{travelEstimate.segments[index].mode}</span> • {travelEstimate.segments[index].time}
                                             </span>
                                             <span className="text-[10px] font-semibold text-green-600">
-                                              Cost: €{travelEstimate.segments[index].cost}
+                                              Cost: &euro;{travelEstimate.segments[index].cost}
                                             </span>
                                           </div>
                                         </div>
@@ -1128,8 +1167,7 @@ export default function App() {
                                     </React.Fragment>
                                   ))}
                                 </div>
-                                
-                                {/* Totals */}
+
                                 <div className="mt-6 flex justify-between items-center bg-white p-2.5 rounded-lg border border-purple-100 shadow-sm">
                                   <div>
                                     <span className="block text-[9px] text-purple-600 font-bold uppercase">Total Time</span>
@@ -1137,18 +1175,18 @@ export default function App() {
                                   </div>
                                   <div className="text-right">
                                     <span className="block text-[9px] text-purple-600 font-bold uppercase">Total Cost</span>
-                                    <span className="text-xs font-bold text-green-600">€{travelEstimate.totalCost}</span>
+                                    <span className="text-xs font-bold text-green-600">&euro;{travelEstimate.totalCost}</span>
                                   </div>
                                 </div>
-                                
+
                                 <div className="mt-4 pt-3 border-t border-purple-200/50 flex justify-end">
-                                  <a 
+                                  <a
                                     href={`https://www.google.com/travel/flights?q=Flights%20from%20${encodeURIComponent(flightOrigin.trim())}%20to%20${encodeURIComponent(displayedUni.nearest_airport?.name || displayedUni.name)}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-600 hover:text-blue-800 transition-colors"
                                   >
-                                    <ExternalLink className="w-3 h-3" />
+                                    <ExternalLink className="w-3 h-3" aria-hidden="true" />
                                     Check actual prices on Google Flights
                                   </a>
                                 </div>
@@ -1166,7 +1204,7 @@ export default function App() {
                   onClick={() => { setPreselectedUni(displayedUni.name); setIsContactModalOpen(true); }}
                   className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-xl font-bold text-sm transition-colors shadow-md shadow-blue-200"
                 >
-                  <GraduationCap className="w-5 h-5" />
+                  <GraduationCap className="w-5 h-5" aria-hidden="true" />
                   Apply to {displayedUni.name}
                 </button>
               </div>
@@ -1174,23 +1212,23 @@ export default function App() {
           )}
         </aside>
       </div>
-      
+
       {/* Help Prompt */}
       {showHelpPrompt && currentPage === 'home' && (
-        <div className="fixed top-20 right-4 md:right-6 z-[2000] w-[90vw] max-w-sm bg-blue-600 rounded-2xl shadow-[0_20px_50px_-12px_rgba(0,0,0,0.3)] border border-blue-500 p-5 animate-in fade-in slide-in-from-top-4 duration-500">
-          {/* Tooltip Arrow pointing up to the About button */}
+        <div className="fixed top-20 right-4 md:right-6 z-[2000] w-[90vw] max-w-sm bg-blue-600 rounded-2xl shadow-[0_20px_50px_-12px_rgba(0,0,0,0.3)] border border-blue-500 p-5 animate-in fade-in slide-in-from-top-4 duration-500" role="dialog" aria-label="Help prompt">
           <div className="absolute -top-2 right-[54px] md:right-[325px] w-4 h-4 bg-blue-600 rotate-45 border-t border-l border-blue-500"></div>
-          
+
           <div className="flex items-start gap-4 relative z-10">
             <div className="bg-white/20 p-2.5 rounded-xl text-white shrink-0">
-              <HelpCircle className="w-6 h-6" />
+              <HelpCircle className="w-6 h-6" aria-hidden="true" />
             </div>
             <div className="flex-1">
               <div className="flex justify-between items-start">
                 <h3 className="font-bold text-white mb-1 text-lg">Need some help?</h3>
-                <button 
-                  onClick={handleDismissHelp} 
+                <button
+                  onClick={handleDismissHelp}
                   className="text-blue-200 hover:text-white -mt-1 -mr-1 p-1 transition-colors"
+                  aria-label="Dismiss help prompt"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -1203,11 +1241,15 @@ export default function App() {
         </div>
       )}
 
-      <ContactModal 
-        isOpen={isContactModalOpen} 
-        onClose={() => setIsContactModalOpen(false)}
-        initialUniversities={preselectedUni}
-      />
+      {isContactModalOpen && (
+        <Suspense fallback={null}>
+          <ContactModal
+            isOpen={isContactModalOpen}
+            onClose={() => setIsContactModalOpen(false)}
+            initialUniversities={preselectedUni}
+          />
+        </Suspense>
+      )}
       <Analytics />
       <SpeedInsights />
     </div>

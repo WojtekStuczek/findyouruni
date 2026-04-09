@@ -4,13 +4,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- Preconnect to external domains -->
+    <!-- Preconnect to tile subdomains (no crossorigin — same-site fetch) -->
+    <link rel="preconnect" href="https://a.basemaps.cartocdn.com" />
+    <link rel="preconnect" href="https://b.basemaps.cartocdn.com" />
+    <link rel="preconnect" href="https://c.basemaps.cartocdn.com" />
+    <link rel="preconnect" href="https://d.basemaps.cartocdn.com" />
+
+    <!-- Preconnect to Cloudinary (crossorigin — CORS images) -->
     <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
-    <link rel="preconnect" href="https://basemaps.cartocdn.com" crossorigin />
-    <link rel="preconnect" href="https://flagcdn.com" crossorigin />
 
     <!-- Preload critical data -->
     <link rel="preload" href="/data/universities.json" as="fetch" crossorigin />
+    <link rel="preload" href="/data/cloudinaryUrls.json" as="fetch" crossorigin />
 
     <!-- Favicons -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" sizes="any" />
