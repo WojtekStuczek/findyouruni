@@ -543,13 +543,20 @@ export default function App() {
       setMapInitialized(true);
     };
 
-    // Use requestAnimationFrame to avoid forced reflow during initial render
-    const rafId = requestAnimationFrame(() => {
-      initMap();
+    // Double-rAF: first rAF waits for pending style/layout, second runs
+    // after the browser has painted — avoids forced reflow from Leaflet's
+    // internal geometry reads (getBoundingClientRect, offsetWidth, etc.)
+    let outerRaf = 0;
+    let innerRaf = 0;
+    outerRaf = requestAnimationFrame(() => {
+      innerRaf = requestAnimationFrame(() => {
+        initMap();
+      });
     });
 
     return () => {
-      cancelAnimationFrame(rafId);
+      cancelAnimationFrame(outerRaf);
+      cancelAnimationFrame(innerRaf);
       if (leafletMap.current) {
         leafletMap.current.remove();
         leafletMap.current = null;
