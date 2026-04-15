@@ -105,9 +105,8 @@ export function ContactModal({ isOpen, onClose, initialUniversities = '' }: Cont
       } else {
         throw new Error(result.message || "Failed to send message");
       }
-    } catch (error) {
-      console.error("Error sending email:", error);
-      alert("Wystąpił błąd podczas wysyłania wiadomości. Spróbuj ponownie później.");
+    } catch {
+      alert("Something went wrong while sending your message. Please try again later.");
     } finally {
       setIsSubmitting(false);
     }

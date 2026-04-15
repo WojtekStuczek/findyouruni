@@ -2,12 +2,12 @@ import React, { useEffect, useRef, useState, useMemo, useCallback, lazy, Suspens
 import L from 'leaflet';
 import 'leaflet.markercluster';
 import { universities, cloudinaryUrls } from './data';
-import { Trophy, Info, Search, X, List, Map as MapIcon, ChevronRight, ChevronLeft, Globe, LayoutGrid, ListFilter as Filter, GraduationCap, HelpCircle, Heart, Plane, Train, Bus, Car, Navigation, ExternalLink, Sparkles, Loader2, Share2, Check } from 'lucide-react';
+import { Info, Search, X, List, ChevronRight, ChevronLeft, Globe, ListFilter as Filter, GraduationCap, HelpCircle, Heart, Plane, Train, Bus, Car, Navigation, ExternalLink, Sparkles, Loader2, Share2, Check } from 'lucide-react';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import { List as VirtualList } from 'react-window';
 
-const ContactModal = lazy(() => import('./components/ContactModal').then(m => ({ default: m.ContactModal })));
+
 const AboutPage = lazy(() => import('./components/AboutPage').then(m => ({ default: m.AboutPage })));
 
 interface TravelSegment {
@@ -216,7 +216,7 @@ const UniversityRow = (props: any): React.ReactElement => {
         className=""
       />
       <div className="flex-1 min-w-0">
-        <h3 className="font-bold text-sm truncate text-slate-900">
+        <h3 className="font-bold text-sm truncate text-slate-900" style={{ fontFamily: 'var(--font-display)' }}>
           {uni.name}
         </h3>
         <p className="text-xs flex items-center gap-1.5 mt-0.5 text-slate-500">
@@ -224,11 +224,11 @@ const UniversityRow = (props: any): React.ReactElement => {
           <span>{uni.country}</span>
         </p>
         <div className="flex items-center gap-2 mt-1.5">
-          <span className="text-[10px] font-bold bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">
-            World: #{uni.world_rank}
+          <span className="text-[10px] font-bold bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded-md">
+            World #{uni.world_rank}
           </span>
-          <span className="text-[10px] font-bold bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded">
-            Europe: #{uni.europe_rank}
+          <span className="text-[10px] font-bold bg-blue-600/10 text-blue-700 px-1.5 py-0.5 rounded-md">
+            Europe #{uni.europe_rank}
           </span>
         </div>
       </div>
@@ -347,8 +347,6 @@ export default function App() {
   const [tempCountry, setTempCountry] = useState<string>('');
   const [tempSpecialization, setTempSpecialization] = useState<string>('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
-  const [preselectedUni, setPreselectedUni] = useState<string>('');
   const [showHelpPrompt, setShowHelpPrompt] = useState(false);
 
   const [favorites, setFavorites] = useState<(number | string)[]>(() => {
@@ -415,9 +413,8 @@ export default function App() {
 
       const data = await response.json();
       setTravelEstimate(data);
-    } catch (error) {
-      console.error("Error estimating travel:", error);
-      setTravelEstimateError("Sorry, I couldn't estimate the travel cost right now. Please try again later.");
+    } catch {
+      setTravelEstimateError("Sorry, we couldn't estimate the travel cost right now. Please try again later.");
     } finally {
       setIsEstimating(false);
     }
@@ -709,8 +706,8 @@ export default function App() {
             <GraduationCap className="w-4 h-4 md:w-5 md:h-5 text-white" />
           </div>
           <div>
-            <h1 className="text-base md:text-xl font-bold tracking-tight leading-none">
-              University Finder
+            <h1 className="text-base md:text-xl font-bold tracking-tight leading-none" style={{ fontFamily: 'var(--font-display)' }}>
+              FindYourUni
             </h1>
           </div>
         </div>
@@ -726,7 +723,7 @@ export default function App() {
                 <Info className="w-4 h-4" />
                 About
                 {showHelpPrompt && (
-                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-[#ff0000] border-2 border-white rounded-full animate-pulse shadow-[0_0_8px_rgba(255,0,0,0.8)]"></span>
+                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 border-2 border-white rounded-full animate-pulse"></span>
                 )}
               </button>
             )}
@@ -740,7 +737,7 @@ export default function App() {
                   >
                     <Info className="w-4 h-4" />
                     {showHelpPrompt && (
-                      <span className="absolute -top-1 -right-1 w-3 h-3 bg-[#ff0000] border-2 border-white rounded-full animate-pulse shadow-[0_0_8px_rgba(255,0,0,0.8)]"></span>
+                      <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 border-2 border-white rounded-full animate-pulse"></span>
                     )}
                   </button>
                   <button
@@ -902,19 +899,13 @@ export default function App() {
               />
             ) : (
               <div className="p-12 text-center">
-                <Search className="w-8 h-8 text-slate-300 mx-auto mb-3" aria-hidden="true" />
-                <p className="text-sm text-slate-400">No results found for your search.</p>
+                <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Search className="w-7 h-7 text-blue-300" aria-hidden="true" />
+                </div>
+                <p className="text-sm font-medium text-slate-500">No universities found</p>
+                <p className="text-xs text-slate-400 mt-1">Try adjusting your search or filters</p>
               </div>
             )}
-          </div>
-          <div className="p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] border-t border-slate-100 bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-10 hidden">
-            <button
-              onClick={() => { setPreselectedUni(''); setIsContactModalOpen(true); }}
-              className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-xl font-bold text-sm transition-colors shadow-md shadow-blue-200"
-            >
-              <GraduationCap className="w-5 h-5" />
-              Need Help Applying?
-            </button>
           </div>
         </aside>
 
@@ -923,10 +914,10 @@ export default function App() {
           <div ref={mapRef} className="absolute inset-0 z-0 map-skeleton" id="map" role="application" aria-label="Interactive map of European universities" />
 
           {/* Legend */}
-          <div className="hidden md:block absolute bottom-8 right-20 z-[1000] p-4 rounded-2xl shadow-xl border max-w-xs transition-all backdrop-blur-md bg-white/90 border-slate-200 text-slate-800">
+          <div className="hidden md:block absolute bottom-8 right-20 z-[1000] p-4 rounded-2xl shadow-lg border max-w-xs transition-all backdrop-blur-md bg-white/95 border-slate-200/60 text-slate-800">
             <div className="flex items-center gap-2 mb-3">
               <Info className="w-4 h-4 text-blue-600" aria-hidden="true" />
-              <h2 className="text-sm font-bold uppercase tracking-tight">Map Legend</h2>
+              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500">Legend</h2>
             </div>
             <div className="space-y-3">
               <div className="flex items-center gap-3">
@@ -967,8 +958,8 @@ export default function App() {
         }`}>
           {displayedUni && (
             <>
-              <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
-                <h2 className="font-bold text-sm uppercase tracking-wider text-slate-500">
+              <div className="p-4 border-b border-blue-100 flex items-center justify-between bg-gradient-to-r from-blue-50 to-indigo-50">
+                <h2 className="font-bold text-sm uppercase tracking-wider text-blue-600/70" style={{ fontFamily: 'var(--font-display)' }}>
                   University Details
                 </h2>
                 <button onClick={() => setSelectedUni(null)} className="p-1 text-slate-400 hover:text-slate-600 transition-colors" aria-label="Close details panel">
@@ -980,7 +971,7 @@ export default function App() {
                 <div className="flex items-center justify-between gap-3 mb-6">
                   <div className="flex items-center gap-3">
                     <img src={`https://flagcdn.com/w40/${getCountryCode(displayedUni.country)}.png`} alt={`Flag of ${displayedUni.country}`} className="w-10 h-auto rounded-sm shadow-md" />
-                    <h2 className="text-2xl font-bold leading-tight text-slate-900">{displayedUni.name}</h2>
+                    <h2 className="text-2xl font-bold leading-tight text-slate-900" style={{ fontFamily: 'var(--font-display)' }}>{displayedUni.name}</h2>
                   </div>
                   <div className="flex items-center gap-1">
                     <button
@@ -1015,14 +1006,14 @@ export default function App() {
                     <p className="text-slate-700 font-medium">{displayedUni.country}</p>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-gradient-to-br from-slate-50 to-slate-100 p-4 rounded-xl border border-slate-200/60">
                       <h3 className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">World Rank</h3>
-                      <p className="text-xl font-bold text-slate-800">#{displayedUni.world_rank}</p>
+                      <p className="text-2xl font-extrabold text-slate-800" style={{ fontFamily: 'var(--font-display)' }}>#{displayedUni.world_rank}</p>
                     </div>
-                    <div className="bg-blue-50 p-3 rounded-xl border border-blue-100">
-                      <h3 className="text-[10px] font-bold uppercase tracking-wider text-blue-400 mb-1">Europe Rank</h3>
-                      <p className="text-xl font-bold text-blue-700">#{displayedUni.europe_rank}</p>
+                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-200/60">
+                      <h3 className="text-[10px] font-bold uppercase tracking-wider text-blue-500 mb-1">Europe Rank</h3>
+                      <p className="text-2xl font-extrabold text-blue-700" style={{ fontFamily: 'var(--font-display)' }}>#{displayedUni.europe_rank}</p>
                     </div>
                   </div>
 
@@ -1045,11 +1036,22 @@ export default function App() {
                     <div>
                       <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Top Specializations</h3>
                       <div className="flex flex-wrap gap-2">
-                        {displayedUni.specializations.map((spec: string, idx: number) => (
-                          <span key={idx} className="bg-slate-100 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-200">
-                            {spec}
-                          </span>
-                        ))}
+                        {displayedUni.specializations.map((spec: string, idx: number) => {
+                          const tagColors = [
+                            'bg-blue-50 text-blue-700 border-blue-200/60',
+                            'bg-emerald-50 text-emerald-700 border-emerald-200/60',
+                            'bg-violet-50 text-violet-700 border-violet-200/60',
+                            'bg-amber-50 text-amber-700 border-amber-200/60',
+                            'bg-rose-50 text-rose-700 border-rose-200/60',
+                            'bg-cyan-50 text-cyan-700 border-cyan-200/60',
+                            'bg-orange-50 text-orange-700 border-orange-200/60',
+                          ];
+                          return (
+                            <span key={idx} className={`px-3 py-1.5 rounded-lg text-xs font-medium border ${tagColors[idx % tagColors.length]}`}>
+                              {spec}
+                            </span>
+                          );
+                        })}
                       </div>
                     </div>
                   )}
@@ -1199,15 +1201,6 @@ export default function App() {
                   )}
                 </div>
               </div>
-              <div className="p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] border-t border-slate-100 bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-10 hidden">
-                <button
-                  onClick={() => { setPreselectedUni(displayedUni.name); setIsContactModalOpen(true); }}
-                  className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-xl font-bold text-sm transition-colors shadow-md shadow-blue-200"
-                >
-                  <GraduationCap className="w-5 h-5" aria-hidden="true" />
-                  Apply to {displayedUni.name}
-                </button>
-              </div>
             </>
           )}
         </aside>
@@ -1241,15 +1234,6 @@ export default function App() {
         </div>
       )}
 
-      {isContactModalOpen && (
-        <Suspense fallback={null}>
-          <ContactModal
-            isOpen={isContactModalOpen}
-            onClose={() => setIsContactModalOpen(false)}
-            initialUniversities={preselectedUni}
-          />
-        </Suspense>
-      )}
       <Analytics />
       <SpeedInsights />
     </div>

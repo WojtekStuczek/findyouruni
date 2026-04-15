@@ -44,12 +44,11 @@ export function AboutPage({ onBack }: AboutPageProps) {
           setReportStatus('idle');
         }, 3000);
       } else {
-        alert("Wystąpił błąd podczas wysyłania zgłoszenia. Spróbuj ponownie później.");
+        alert("Something went wrong while sending your report. Please try again later.");
         setReportStatus('idle');
       }
-    } catch (error) {
-      console.error("Error submitting report:", error);
-      alert("Wystąpił błąd podczas wysyłania zgłoszenia. Sprawdź połączenie z internetem.");
+    } catch {
+      alert("Something went wrong while sending your report. Please check your internet connection.");
       setReportStatus('idle');
     }
   };
@@ -58,7 +57,7 @@ export function AboutPage({ onBack }: AboutPageProps) {
     <div className="h-[100dvh] overflow-y-auto bg-slate-50 text-slate-900">
       {/* Header */}
       <header className="sticky top-0 z-50 border-b px-4 md:px-6 py-3 md:py-4 shadow-sm flex items-center gap-4 bg-white/90 backdrop-blur-md">
-        <button 
+        <button
           onClick={onBack}
           className="p-2 -ml-2 rounded-full hover:bg-slate-100 transition-colors text-slate-600"
           aria-label="Back to map"
@@ -69,7 +68,7 @@ export function AboutPage({ onBack }: AboutPageProps) {
           <div className="bg-blue-600 p-1.5 md:p-2 rounded-lg shadow-blue-200 shadow-lg shrink-0">
             <GraduationCap className="w-4 h-4 md:w-5 md:h-5 text-white" />
           </div>
-          <h1 className="text-base md:text-xl font-bold tracking-tight leading-none">
+          <h1 className="text-base md:text-xl font-bold tracking-tight leading-none" style={{ fontFamily: 'var(--font-display)' }}>
             About
           </h1>
         </div>
@@ -79,7 +78,7 @@ export function AboutPage({ onBack }: AboutPageProps) {
       <main className="max-w-3xl mx-auto px-4 py-8 md:py-12 space-y-12">
         {/* Hero Section */}
         <section className="text-center space-y-4">
-          <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900">
+          <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900" style={{ fontFamily: 'var(--font-display)' }}>
             Find your dream university in Europe
           </h2>
           <p className="text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
@@ -89,7 +88,7 @@ export function AboutPage({ onBack }: AboutPageProps) {
 
         {/* How it works */}
         <section className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200">
-          <h3 className="text-2xl font-bold mb-6">How to use the platform?</h3>
+          <h3 className="text-2xl font-bold mb-6" style={{ fontFamily: 'var(--font-display)' }}>How to use the platform?</h3>
           <div className="grid sm:grid-cols-2 gap-6">
             <div className="flex gap-4">
               <div className="bg-blue-50 p-3 rounded-xl h-fit shrink-0">
@@ -101,8 +100,8 @@ export function AboutPage({ onBack }: AboutPageProps) {
               </div>
             </div>
             <div className="flex gap-4">
-              <div className="bg-blue-50 p-3 rounded-xl h-fit shrink-0">
-                <Search className="w-6 h-6 text-blue-600" />
+              <div className="bg-violet-50 p-3 rounded-xl h-fit shrink-0">
+                <Search className="w-6 h-6 text-violet-600" />
               </div>
               <div>
                 <h4 className="font-bold text-lg mb-1">Search</h4>
@@ -110,8 +109,8 @@ export function AboutPage({ onBack }: AboutPageProps) {
               </div>
             </div>
             <div className="flex gap-4">
-              <div className="bg-blue-50 p-3 rounded-xl h-fit shrink-0">
-                <Filter className="w-6 h-6 text-blue-600" />
+              <div className="bg-amber-50 p-3 rounded-xl h-fit shrink-0">
+                <Filter className="w-6 h-6 text-amber-600" />
               </div>
               <div>
                 <h4 className="font-bold text-lg mb-1">Filter</h4>
@@ -119,8 +118,8 @@ export function AboutPage({ onBack }: AboutPageProps) {
               </div>
             </div>
             <div className="flex gap-4">
-              <div className="bg-blue-50 p-3 rounded-xl h-fit shrink-0">
-                <Globe className="w-6 h-6 text-blue-600" />
+              <div className="bg-emerald-50 p-3 rounded-xl h-fit shrink-0">
+                <Globe className="w-6 h-6 text-emerald-600" />
               </div>
               <div>
                 <h4 className="font-bold text-lg mb-1">Compare</h4>
@@ -132,7 +131,7 @@ export function AboutPage({ onBack }: AboutPageProps) {
 
         {/* Methodology / Data */}
         <section className="space-y-4">
-          <h3 className="text-2xl font-bold">Where do we get our data?</h3>
+          <h3 className="text-2xl font-bold" style={{ fontFamily: 'var(--font-display)' }}>Where do we get our data?</h3>
           <div className="prose prose-slate max-w-none text-slate-600 leading-relaxed">
             <p>
               Our database is based on the prestigious <strong>QS World University Rankings</strong>. We strive to regularly update university positions to provide reliable and trustworthy data.
@@ -148,7 +147,7 @@ export function AboutPage({ onBack }: AboutPageProps) {
 
         {/* FAQ */}
         <section className="space-y-6">
-          <h3 className="text-2xl font-bold">Frequently Asked Questions (FAQ)</h3>
+          <h3 className="text-2xl font-bold" style={{ fontFamily: 'var(--font-display)' }}>Frequently Asked Questions</h3>
           <div className="space-y-4">
             <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
               <h4 className="font-bold text-lg mb-2">Can I search for specific study programs or majors?</h4>

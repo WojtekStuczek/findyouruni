@@ -13,6 +13,13 @@
     <!-- Preconnect to Cloudinary (crossorigin — CORS images) -->
     <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
 
+    <!-- Preconnect to Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- Fonts: Bricolage Grotesque (display) + Figtree (body) -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&display=swap" />
+
     <!-- Preload critical data -->
     <link rel="preload" href="/data/universities.json" as="fetch" crossorigin />
     <link rel="preload" href="/data/cloudinaryUrls.json" as="fetch" crossorigin />
@@ -78,7 +85,7 @@
           height: 100vh;
           width: 100vw;
           background-color: #f8fafc;
-          font-family: system-ui, sans-serif;
+          font-family: "Figtree", system-ui, sans-serif;
         }
         .spinner {
           width: 40px;
