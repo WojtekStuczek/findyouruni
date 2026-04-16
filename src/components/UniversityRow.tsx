@@ -23,7 +23,7 @@ export const UniversityRow = (props: UniversityRowProps): React.ReactElement => 
     <div
       style={style}
       onClick={() => focusUniversity(uni)}
-      role="button"
+      role="listitem"
       tabIndex={0}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
@@ -40,9 +40,9 @@ export const UniversityRow = (props: UniversityRowProps): React.ReactElement => 
         rankTextClass={rankTextClass}
       />
       <div className="flex-1 min-w-0">
-        <h3 className="font-bold text-sm truncate text-slate-900">
+        <p className="font-bold text-sm truncate text-slate-900">
           {uni.name}
-        </h3>
+        </p>
         <p className="text-xs flex items-center gap-1.5 mt-0.5 text-slate-500">
           <img src={`https://flagcdn.com/w40/${getCountryCode(uni.country)}.png`} alt={`Flag of ${uni.country}`} className="w-4 h-auto rounded-[2px] shadow-sm" loading="lazy" />
           <span>{uni.country}</span>
