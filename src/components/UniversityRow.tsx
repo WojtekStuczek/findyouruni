@@ -44,7 +44,7 @@ export const UniversityRow = (props: UniversityRowProps): React.ReactElement => 
           {uni.name}
         </p>
         <p className="text-xs flex items-center gap-1.5 mt-0.5 text-slate-500">
-          <img src={`https://flagcdn.com/w40/${getCountryCode(uni.country)}.png`} alt={`Flag of ${uni.country}`} className="w-4 h-auto rounded-[2px] shadow-sm" loading="lazy" />
+          <img src={`https://flagcdn.com/w40/${getCountryCode(uni.country)}.png`} alt={`Flag of ${uni.country}`} width="16" height="12" className="w-4 h-auto rounded-[2px] shadow-sm" loading="lazy" />
           <span>{uni.country}</span>
         </p>
         <div className="flex items-center gap-2 mt-1.5">

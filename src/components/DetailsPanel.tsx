@@ -63,7 +63,7 @@ export function DetailsPanel({ selectedUni, favorites, onClose, toggleFavorite }
         <DetailsImage uni={displayedUni} />
         <div className="flex items-center justify-between gap-3 mb-6">
           <div className="flex items-center gap-3">
-            <img src={`https://flagcdn.com/w40/${getCountryCode(displayedUni.country)}.png`} alt={`Flag of ${displayedUni.country}`} className="w-10 h-auto rounded-sm shadow-md" />
+            <img src={`https://flagcdn.com/w40/${getCountryCode(displayedUni.country)}.png`} alt={`Flag of ${displayedUni.country}`} width="40" height="30" className="w-10 h-auto rounded-sm shadow-md" />
             <h2 className="text-2xl font-bold leading-tight text-slate-900">{displayedUni.name}</h2>
           </div>
           <div className="flex items-center gap-1">
