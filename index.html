@@ -8,6 +8,8 @@
     <link rel="preconnect" href="https://a.basemaps.cartocdn.com" crossorigin />
     <link rel="preconnect" href="https://b.basemaps.cartocdn.com" crossorigin />
     <link rel="preconnect" href="https://c.basemaps.cartocdn.com" crossorigin />
+    <link rel="preconnect" href="https://flagcdn.com" crossorigin />
+    <link rel="dns-prefetch" href="https://flagcdn.com" />
 
     <!-- Fonts: async load to stay off critical path -->
     <link rel="stylesheet" media="print" onload="this.media='all'" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&display=swap" />
@@ -71,27 +73,13 @@
   <body>
     <div id="root">
       <style>
-        .initial-loader {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          height: 100vh;
-          width: 100vw;
-          background-color: #f8fafc;
-          font-family: "Figtree", system-ui, sans-serif;
-        }
-        .spinner {
-          width: 40px;
-          height: 40px;
-          border: 4px solid #bfdbfe;
-          border-top: 4px solid #3b82f6;
-          border-radius: 50%;
-          animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
+        /* Critical above-the-fold CSS — renders shell before main bundle */
+        *,*::before,*::after{box-sizing:border-box}
+        body{margin:0;padding:0;overflow:hidden;font-family:"Figtree",ui-sans-serif,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+        #root{height:100vh;width:100vw}
+        .initial-loader{display:flex;justify-content:center;align-items:center;height:100vh;width:100vw;background-color:#f8fafc}
+        .spinner{width:40px;height:40px;border:4px solid #bfdbfe;border-top:4px solid #3b82f6;border-radius:50%;animation:spin 1s linear infinite}
+        @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
       </style>
       <div class="initial-loader">
         <div class="spinner"></div>
