@@ -51,8 +51,8 @@ export function DetailsPanel({ selectedUni, favorites, onClose, toggleFavorite }
     <aside aria-label="University details" className={`z-[1000] absolute inset-y-0 right-0 w-full md:w-80 lg:w-96 transition-transform duration-300 transform bg-white border-l border-slate-200 flex flex-col shadow-2xl ${
       selectedUni ? 'translate-x-0' : 'translate-x-full'
     }`}>
-      <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
-        <h2 className="font-bold text-sm uppercase tracking-wider text-slate-500">
+      <div className="p-4 border-b border-blue-100 flex items-center justify-between bg-gradient-to-r from-blue-50 to-indigo-50">
+        <h2 className="font-bold text-sm uppercase tracking-wider text-blue-600/70" style={{ fontFamily: 'var(--font-display)' }}>
           University Details
         </h2>
         <button onClick={onClose} className="p-1 text-slate-400 hover:text-slate-600 transition-colors" aria-label="Close details panel">
@@ -64,7 +64,7 @@ export function DetailsPanel({ selectedUni, favorites, onClose, toggleFavorite }
         <div className="flex items-center justify-between gap-3 mb-6">
           <div className="flex items-center gap-3">
             <img src={`https://flagcdn.com/w40/${getCountryCode(displayedUni.country)}.png`} alt={`Flag of ${displayedUni.country}`} width="40" height="30" className="w-10 h-auto rounded-sm shadow-md" />
-            <h2 className="text-2xl font-bold leading-tight text-slate-900">{displayedUni.name}</h2>
+            <h2 className="text-2xl font-bold leading-tight text-slate-900" style={{ fontFamily: 'var(--font-display)' }}>{displayedUni.name}</h2>
           </div>
           <div className="flex items-center gap-1">
             <button
@@ -99,14 +99,14 @@ export function DetailsPanel({ selectedUni, favorites, onClose, toggleFavorite }
             <p className="text-slate-700 font-medium">{displayedUni.country}</p>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-              <h3 className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">World Rank</h3>
-              <p className="text-xl font-bold text-slate-800">#{displayedUni.world_rank}</p>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-gradient-to-br from-slate-50 to-slate-100/80 p-4 rounded-xl border border-slate-200/60">
+              <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">World Rank</h3>
+              <p className="text-2xl font-extrabold text-slate-800" style={{ fontFamily: 'var(--font-display)' }}>#{displayedUni.world_rank}</p>
             </div>
-            <div className="bg-blue-50 p-3 rounded-xl border border-blue-100">
-              <h3 className="text-[10px] font-bold uppercase tracking-wider text-blue-400 mb-1">Europe Rank</h3>
-              <p className="text-xl font-bold text-blue-700">#{displayedUni.europe_rank}</p>
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-200/60">
+              <h3 className="text-[11px] font-bold uppercase tracking-wider text-blue-500 mb-1">Europe Rank</h3>
+              <p className="text-2xl font-extrabold text-blue-700" style={{ fontFamily: 'var(--font-display)' }}>#{displayedUni.europe_rank}</p>
             </div>
           </div>
 
@@ -129,11 +129,22 @@ export function DetailsPanel({ selectedUni, favorites, onClose, toggleFavorite }
             <div>
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Top Specializations</h3>
               <div className="flex flex-wrap gap-2">
-                {displayedUni.specializations.map((spec: string, idx: number) => (
-                  <span key={idx} className="bg-slate-100 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-200">
-                    {spec}
-                  </span>
-                ))}
+                {displayedUni.specializations.map((spec: string, idx: number) => {
+                  const tagColors = [
+                    'bg-blue-50 text-blue-700 border-blue-200/60',
+                    'bg-emerald-50 text-emerald-700 border-emerald-200/60',
+                    'bg-violet-50 text-violet-700 border-violet-200/60',
+                    'bg-amber-50 text-amber-700 border-amber-200/60',
+                    'bg-rose-50 text-rose-700 border-rose-200/60',
+                    'bg-cyan-50 text-cyan-700 border-cyan-200/60',
+                    'bg-orange-50 text-orange-700 border-orange-200/60',
+                  ];
+                  return (
+                    <span key={idx} className={`px-3 py-1.5 rounded-lg text-xs font-medium border ${tagColors[idx % tagColors.length]}`}>
+                      {spec}
+                    </span>
+                  );
+                })}
               </div>
             </div>
           )}

@@ -239,7 +239,7 @@ export default function App() {
           popupAnchor: [0, -16]
         });
         const marker = L.marker([selectedUni.nearest_airport.lat, selectedUni.nearest_airport.lng], { icon: airportIcon, title: `Nearest airport: ${selectedUni.nearest_airport.name}`, alt: `Nearest airport: ${selectedUni.nearest_airport.name}` })
-          .bindPopup(`<b>${selectedUni.nearest_airport.name}</b><br/>Nearest Airport ${selectedUni.nearest_airport.distance_km !== undefined ? `(${selectedUni.nearest_airport.distance_km} km)` : ''}<br/><button onclick="window.openFlightsModal()" style="display: inline-block; margin-top: 5px; color: #9333ea; background: none; border: none; padding: 0; font-weight: bold; font-size: 12px; cursor: pointer;">✨ Estimate Travel Cost</button>`);
+          .bindPopup(`<b>${selectedUni.nearest_airport.name}</b><br/>Nearest Airport ${selectedUni.nearest_airport.distance_km !== undefined ? `(${selectedUni.nearest_airport.distance_km} km)` : ''}<br/><button onclick="window.openFlightsModal()" style="display: inline-block; margin-top: 5px; color: #7c3aed; background: none; border: none; padding: 0; font-weight: bold; font-size: 12px; cursor: pointer;">✨ Estimate Travel Cost</button>`);
         transportMarkersRef.current.addLayer(marker);
         bounds.extend([selectedUni.nearest_airport.lat, selectedUni.nearest_airport.lng]);
       }
@@ -329,7 +329,7 @@ export default function App() {
           <AboutPage onBack={() => setCurrentPage('home')} />
         </Suspense>
       )}
-      <div className={`relative h-[100dvh] w-screen flex flex-col bg-slate-50 ${currentPage === 'about' ? 'hidden' : ''}`}>
+      <div className={`relative h-[100dvh] w-screen flex flex-col ${currentPage === 'about' ? 'hidden' : ''}`} style={{ backgroundColor: 'var(--surface)' }}>
       <a href="#map" className="skip-link">Skip to map</a>
 
       <Header

@@ -48,11 +48,11 @@ export const UniversityRow = (props: UniversityRowProps): React.ReactElement => 
           <span>{uni.country}</span>
         </p>
         <div className="flex items-center gap-2 mt-1.5">
-          <span className="text-[10px] font-bold bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">
-            World: #{uni.world_rank}
+          <span className="text-[10px] font-bold bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded-md">
+            World #{uni.world_rank}
           </span>
-          <span className="text-[10px] font-bold bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded">
-            Europe: #{uni.europe_rank}
+          <span className="text-[10px] font-bold bg-blue-600/10 text-blue-700 px-1.5 py-0.5 rounded-md">
+            Europe #{uni.europe_rank}
           </span>
         </div>
       </div>

@@ -46,8 +46,8 @@ export function Header({
           <GraduationCap className="w-4 h-4 md:w-5 md:h-5 text-white" />
         </div>
         <div>
-          <h1 className="text-base md:text-xl font-bold tracking-tight leading-none">
-            University Finder
+          <h1 className="text-base md:text-xl font-bold tracking-tight leading-none" style={{ fontFamily: 'var(--font-display)' }}>
+            FindYourUni
           </h1>
         </div>
       </div>
@@ -63,7 +63,7 @@ export function Header({
               <Info className="w-4 h-4" />
               About
               {showHelpPrompt && (
-                <span className="absolute -top-1 -right-1 w-3 h-3 bg-[#ff0000] border-2 border-white rounded-full animate-pulse shadow-[0_0_8px_rgba(255,0,0,0.8)]"></span>
+                <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 border-2 border-white rounded-full animate-pulse"></span>
               )}
             </button>
           )}
@@ -77,7 +77,7 @@ export function Header({
                 >
                   <Info className="w-4 h-4" />
                   {showHelpPrompt && (
-                    <span className="absolute -top-1 -right-1 w-3 h-3 bg-[#ff0000] border-2 border-white rounded-full animate-pulse shadow-[0_0_8px_rgba(255,0,0,0.8)]"></span>
+                    <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 border-2 border-white rounded-full animate-pulse"></span>
                   )}
                 </button>
                 <button
